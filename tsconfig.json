@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx", // Para React 17+ (recomendado)
+    // O si usas React 16 o anterior:
+    // "jsx": "react",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "esnext",
+    "esModuleInterop": true,
+    "strict": true,
+    "baseUrl": ".", // Ruta base para los aliases
+    "paths": {
+      "@/*": ["./src/*"],
+      "tailwindcss/types/config": ["./src/types/tailwind-config.d.ts"] // Alias para src/
+    },
+    "types": ["node", "tailwindcss"]
+  },
+  "include": ["src"]
+}
