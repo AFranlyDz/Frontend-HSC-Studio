@@ -5,7 +5,7 @@ export function decodificarHistoriaClinica (historias_clinicas){
         }else{
           hs.historial_trauma_craneal = "No";
         }
-        if (hs.sexo==="1"){
+        if (hs.sexo==true){
           hs.sexo = "Masculino";
         }else{
           hs.sexo = "Femenino";

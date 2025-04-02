@@ -3,14 +3,16 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { Plus, Edit, Trash2, Eye } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useDispatch } from "react-redux"
 
 import DataTable from "@/components/layout/DatatableBase"
 import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
-import { decodificarHistoriaClinica } from "@/controllers/decodificarHistoriaClinica"
 import { Modal } from "@/components/ui/modal"
 import { HistoriaClinicaForm } from "@/features/gestionarHistoriaClinica/HistoriaClinicaForm"
 import { HistoriaClinicaDetail } from "@/features/gestionarHistoriaClinica/HistoriaClinicaDetail"
+import { setHistoriaClinica, resetHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
 
 function RevisionCasos() {
   const apiUrl = import.meta.env.VITE_API_BACKEND
@@ -23,12 +25,14 @@ function RevisionCasos() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDetailModal, setShowDetailModal] = useState(false)
 
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
   // Cargar datos
   const loadData = async () => {
     setLoading(true)
     try {
       const respuesta = await axios.get(`${apiUrl}gestionar_historia_clinica/`)
-      decodificarHistoriaClinica(respuesta.data)
       setData(respuesta.data)
     } catch (error) {
       console.error("Hubo un error al obtener los datos:", error)
@@ -44,14 +48,17 @@ function RevisionCasos() {
 
   // Manejar la visualización de detalles
   const handleVerMas = (rowData) => {
-    setSelectedRecord(rowData)
-    setShowDetailModal(true)
+    // setSelectedRecord(rowData)
+    // setShowDetailModal(true)
+    navigate("/Revision_casos/HistoriaClinica");
+    dispatch(setHistoriaClinica(rowData));
   }
 
   // Manejar la edición
   const handleEditar = (rowData) => {
     setSelectedRecord(rowData)
     setShowEditModal(true)
+    dispatch(setHistoriaClinica(rowData));
   }
 
   // Manejar el borrado
@@ -61,6 +68,7 @@ function RevisionCasos() {
       try {
         await axios.delete(`${apiUrl}gestionar_historia_clinica/${id}/`)
         setData(data.filter((item) => item.id !== id))
+        resetHistoriaClinica();
       } catch (error) {
         console.error("Error al borrar:", error)
         alert("Error al eliminar el registro")
@@ -97,6 +105,7 @@ function RevisionCasos() {
       const response = await axios.put(`${apiUrl}gestionar_historia_clinica/${formData.id}/`, formData)
       setData(data.map((item) => (item.id === formData.id ? response.data : item)))
       setShowEditModal(false)
+      dispatch(setHistoriaClinica(formData));
 
       // Mostrar mensaje con el seudónimo actualizado
       alert(
