@@ -1,11 +1,14 @@
-import { useState } from "react";
-import { useSelector } from "react-redux";
-import { EmptyState } from "./EmptyState";
-import { RasgosClinicosSection } from "./RasgosClinicosSection";
+"use client"
+
+import { useState } from "react"
+import { useSelector } from "react-redux"
+import { EmptyState } from "./EmptyState"
+import { RasgosClinicosSection } from "./RasgosClinicosSection"
+import { EditarRasgosClinicosForm } from "./EditarRasgosClinicosForm"
 
 export const RasgosClinicosPanel = () => {
-  const { datos } = useSelector((state) => state.historiaClinica);
-  const [editing, setEditing] = useState(false);
+  const { datos } = useSelector((state) => state.historiaClinica)
+  const [editing, setEditing] = useState(false)
 
   // Clasificaciones de rasgos clínicos
   const clasificaciones = [
@@ -14,9 +17,9 @@ export const RasgosClinicosPanel = () => {
     "Antecedente Patológico",
     "Lesión Isquémica",
     "Factor de Riesgo",
-  ];
+  ]
 
-  const hasRasgos = datos.rcg && datos.rcg.length > 0;
+  const hasRasgos = datos.rcg && datos.rcg.length > 0
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 w-full">
@@ -38,12 +41,7 @@ export const RasgosClinicosPanel = () => {
             stroke="currentColor"
           >
             {editing ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             ) : (
               <path
                 strokeLinecap="round"
@@ -57,25 +55,18 @@ export const RasgosClinicosPanel = () => {
       </div>
 
       {editing ? (
-        <EmptyState message="Módulo de edición en desarrollo" />
+        <EditarRasgosClinicosForm onCancel={() => setEditing(false)} />
       ) : !hasRasgos ? (
         <EmptyState message="No existen rasgos clínicos globales registrados" />
       ) : (
         <div className="space-y-8 w-full">
           {clasificaciones.map((clasificacion) => {
-            const items = datos.rcg.filter(
-              (item) => item.codificador.clasificacion === clasificacion
-            );
-            return (
-              <RasgosClinicosSection
-                key={clasificacion}
-                title={clasificacion}
-                items={items}
-              />
-            );
+            const items = datos.rcg.filter((item) => item.codificador.clasificacion === clasificacion)
+            return <RasgosClinicosSection key={clasificacion} title={clasificacion} items={items} />
           })}
         </div>
       )}
     </div>
-  );
-};
+  )
+}
+
