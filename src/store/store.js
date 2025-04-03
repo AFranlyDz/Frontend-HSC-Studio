@@ -3,15 +3,17 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
 import historiaClinicaReducer from "@/features/gestionarHistoriaClinica/historiaClinicaSlice";
+import codificadorReducer from "@/features/codificadores/codificadoresSlice"
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["historiaClinica"], // Solo persiste este slice
+  whitelist: ["historiaClinica", "codificador"], // Solo persiste este slice
 };
 
 const rootReducer = combineReducers({
   historiaClinica: historiaClinicaReducer,
+  codificador: codificadorReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

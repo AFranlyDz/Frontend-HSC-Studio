@@ -1,0 +1,27 @@
+/* Estilos personalizados para react-data-table-component */
+.rdt_Table {
+  width: 100% !important;
+}
+
+.rdt_TableRow {
+  width: 100% !important;
+}
+
+.rdt_TableCol {
+  flex-grow: 1 !important;
+  flex-basis: 0 !important;
+  text-align: center !important;
+}
+
+.rdt_TableCell {
+  flex-grow: 1 !important;
+  flex-basis: 0 !important;
+  text-align: center !important;
+}
+
+/* Estilo específico para la columna de acciones */
+.rdt_TableCol:last-child,
+.rdt_TableCell:last-child {
+  justify-content: center !important;
+}
+
