@@ -1,17 +1,36 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { Brain, Activity, ClipboardList, Users, FileText, ArrowRight, BadgeAlert } from "lucide-react"
+import { useDispatch } from "react-redux"
+import axios from "axios"
+
 import Header from "@/components/layout/Header.jsx"
 import Footer from "@/components/layout/Footer.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Brain, Activity, ClipboardList, Users, FileText, ArrowRight, BadgeAlert } from "lucide-react"
+import {setCodificadores} from "@/features/codificadores/codificadoresSlice"
 
 function Home() {
+  const apiUrl = import.meta.env.VITE_API_BACKEND
+  const [loading, setLoading] = useState(false)
+  const dispatch = useDispatch()
   // Al cargar la página, hacemos scroll al principio
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+    window.scrollTo(0, 0);
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const respuesta = await axios.get(`${apiUrl}codificadores/`)
+        dispatch(setCodificadores(respuesta.data))
+      } catch (error) {
+        console.error("Hubo un error al obtener los datos:", error)
+      } finally {
+        setLoading(false)
+      }
+    };
+    loadData()
+  }, [apiUrl, dispatch])
 
   return (
     <div className="flex flex-col min-h-screen w-full">

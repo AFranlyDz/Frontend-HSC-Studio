@@ -11,7 +11,6 @@ import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
 import { Modal } from "@/components/ui/modal"
 import { HistoriaClinicaForm } from "@/features/gestionarHistoriaClinica/HistoriaClinicaForm"
-import { HistoriaClinicaDetail } from "@/features/gestionarHistoriaClinica/HistoriaClinicaDetail"
 import { setHistoriaClinica, resetHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
 
 function RevisionCasos() {
@@ -48,17 +47,15 @@ function RevisionCasos() {
 
   // Manejar la visualización de detalles
   const handleVerMas = (rowData) => {
-    // setSelectedRecord(rowData)
-    // setShowDetailModal(true)
-    navigate("/Revision_casos/HistoriaClinica");
-    dispatch(setHistoriaClinica(rowData));
+    navigate("/Revision_casos/HistoriaClinica")
+    dispatch(setHistoriaClinica(rowData))
   }
 
   // Manejar la edición
   const handleEditar = (rowData) => {
     setSelectedRecord(rowData)
     setShowEditModal(true)
-    dispatch(setHistoriaClinica(rowData));
+    dispatch(setHistoriaClinica(rowData))
   }
 
   // Manejar el borrado
@@ -68,7 +65,7 @@ function RevisionCasos() {
       try {
         await axios.delete(`${apiUrl}gestionar_historia_clinica/${id}/`)
         setData(data.filter((item) => item.id !== id))
-        resetHistoriaClinica();
+        resetHistoriaClinica()
       } catch (error) {
         console.error("Error al borrar:", error)
         alert("Error al eliminar el registro")
@@ -105,7 +102,7 @@ function RevisionCasos() {
       const response = await axios.put(`${apiUrl}gestionar_historia_clinica/${formData.id}/`, formData)
       setData(data.map((item) => (item.id === formData.id ? response.data : item)))
       setShowEditModal(false)
-      dispatch(setHistoriaClinica(formData));
+      dispatch(setHistoriaClinica(formData))
 
       // Mostrar mensaje con el seudónimo actualizado
       alert(
@@ -119,52 +116,65 @@ function RevisionCasos() {
     }
   }
 
+  // Columnas con mejor distribución y más espacio para acciones
   const columns = [
     {
       name: "Número",
       selector: (row) => row.numero,
       sortable: true,
-      width: "120px", // Ancho ajustado
+      grow: 1,
+      center: true,
+      minWidth: "100px",
+      maxWidth: "150px",
     },
     {
       name: "Seudónimo",
       selector: (row) => row.seudonimo,
       sortable: true,
-      width: "120px", // Ancho ajustado
+      grow: 1.2,
+      center: true,
+      minWidth: "120px",
+      maxWidth: "180px",
     },
     {
       name: "Edad",
       selector: (row) => row.edad,
       sortable: true,
-      width: "80px", // Ancho ajustado
+      grow: 0.8,
+      center: true,
+      minWidth: "80px",
+      maxWidth: "100px",
     },
     {
       name: "Sexo",
       cell: (row) => (row.sexo === true ? "Masculino" : "Femenino"),
       sortable: true,
-      width: "100px", // Ancho ajustado
+      grow: 1,
+      center: true,
+      minWidth: "100px",
+      maxWidth: "150px",
     },
     {
       name: "Acciones",
       cell: (row) => (
-        <div className="flex space-x-1">
+        <div className="flex justify-center space-x-2">
           <button
             onClick={() => handleVerMas(row)}
-            className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="p-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
             title="Ver detalles"
           >
             <Eye size={16} />
           </button>
           <button
             onClick={() => handleEditar(row)}
-            className="p-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+            className="p-1.5 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
             title="Editar"
           >
             <Edit size={16} />
           </button>
           <button
             onClick={() => handleBorrar(row.id)}
-            className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+            className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
             title="Eliminar"
           >
             <Trash2 size={16} />
@@ -174,7 +184,10 @@ function RevisionCasos() {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      width: "110px", // Ancho ajustado
+      grow: 2, // Más espacio para los botones de acción
+      center: true,
+      minWidth: "180px",
+      maxWidth: "220px",
     },
   ]
 
@@ -211,13 +224,13 @@ function RevisionCasos() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex flex-col min-h-screen">
       <Header />
 
       {/* Hero Section con fondo similar al de home.tsx */}
       <section className="pt-24 pb-6 md:pt-32 md:pb-8 bg-gradient-to-b from-gray-100 to-white w-full">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 max-w-7xl mx-auto">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Historias Clínicas</h1>
             <p className="text-lg text-gray-700">Gestión de historias clínicas de pacientes con hematomas subdurales</p>
           </div>
@@ -226,36 +239,38 @@ function RevisionCasos() {
 
       {/* Content Section */}
       <section className="pt-2 pb-8 bg-white w-full flex-grow">
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-6 max-w-7xl mx-auto">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold text-gray-800">Listado de Historias Clínicas</h2>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               <Plus size={18} className="mr-1" /> Agregar
             </button>
           </div>
 
           {/* DataTable */}
-          <div className="bg-white rounded-lg shadow overflow-hidden max-w-7xl mx-auto">
-            <DataTable
-              columns={columns}
-              data={data}
-              progressPending={loading}
-              pagination
-              paginationPerPage={10}
-              paginationRowsPerPageOptions={[10, 20, 30, 50]}
-              expandableRows
-              expandableRowsComponent={ExpandedComponent}
-              expandOnRowClicked
-              expandableRowsHideExpander
-              highlightOnHover
-              noDataComponent={<div className="p-4 text-center text-gray-500">No hay registros disponibles</div>}
-              responsive={true}
-              fixedHeader={true}
-              fixedHeaderScrollHeight="500px"
-            />
+          <div className="bg-white rounded-lg shadow w-full overflow-hidden">
+            <div className="px-2 py-2 w-full">
+              <DataTable
+                columns={columns}
+                data={data}
+                progressPending={loading}
+                pagination
+                paginationPerPage={10}
+                paginationRowsPerPageOptions={[10, 20, 30, 50]}
+                expandableRows
+                expandableRowsComponent={ExpandedComponent}
+                expandOnRowClicked
+                expandableRowsHideExpander
+                highlightOnHover
+                noDataComponent={<div className="p-4 text-center text-gray-500">No hay registros disponibles</div>}
+                responsive
+                fixedHeader
+                fixedHeaderScrollHeight="500px"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -268,16 +283,6 @@ function RevisionCasos() {
       {/* Modal para editar */}
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Historia Clínica" size="lg">
         <HistoriaClinicaForm initialData={selectedRecord} onSubmit={handleUpdate} isLoading={loading} />
-      </Modal>
-
-      {/* Modal para ver detalles */}
-      <Modal
-        isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
-        title="Detalles de Historia Clínica"
-        size="lg"
-      >
-        {selectedRecord && <HistoriaClinicaDetail data={selectedRecord} />}
       </Modal>
 
       <Footer />
