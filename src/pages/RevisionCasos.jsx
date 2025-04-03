@@ -206,18 +206,29 @@ function RevisionCasos() {
       }
     }
 
+    // Lista de campos a mostrar
+    const camposAMostrar = [
+      "numero",
+      "seudonimo",
+      "nombre",
+      "apellidos",
+      "edad",
+      "sexo",
+      "historial_trauma_craneal",
+      "manualidad",
+      "antecedentes_familiares",
+    ]
+
     return (
       <div className="p-4 bg-gray-50 border-t border-b">
-        <h3 className="font-bold mb-2">Detalles completos:</h3>
+        <h3 className="font-bold mb-2">Detalles del paciente:</h3>
         <div className="grid grid-cols-2 gap-4">
-          {Object.entries(data)
-            .filter(([key]) => key !== "id") // Excluir el ID
-            .map(([key, value]) => (
-              <div key={key} className="p-2 bg-white rounded shadow">
-                <strong className="text-gray-700">{key}:</strong>{" "}
-                <span className="text-gray-900">{formatValue(key, value)}</span>
-              </div>
-            ))}
+          {camposAMostrar.map((key) => (
+            <div key={key} className="p-2 bg-white rounded shadow">
+              <strong className="text-gray-700">{key}:</strong>{" "}
+              <span className="text-gray-900">{formatValue(key, data[key])}</span>
+            </div>
+          ))}
         </div>
       </div>
     )
