@@ -112,8 +112,8 @@ export const EditarRasgosClinicosForm = ({ onCancel }) => {
           promesas.push(
             axios
               .post(`${apiUrl}rasgos_clinicos_globales/`, {
-                historia_clinica: paciente.id,
-                codificador: Number.parseInt(codificadorId),
+                historia_clinica_id: paciente.id,
+                codificador_id: Number.parseInt(codificadorId),
                 notas: notas[codificadorId] || "",
               })
               .then((response) => console.log(`Añadido nuevo rasgo clínico:`, response.data))
@@ -135,8 +135,8 @@ export const EditarRasgosClinicosForm = ({ onCancel }) => {
               promesas.push(
                 axios
                   .put(`${apiUrl}rasgos_clinicos_globales/${asociacionId}/`, {
-                    historia_clinica: paciente.id,
-                    codificador: Number.parseInt(codificadorId),
+                    historia_clinica_id: paciente.id,
+                    codificador_id: Number.parseInt(codificadorId),
                     notas: notas[codificadorId] || "",
                   })
                   .then((response) =>
@@ -184,42 +184,32 @@ export const EditarRasgosClinicosForm = ({ onCancel }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-800">Editar Rasgos Clínicos Globales</h3>
-        <div className="flex space-x-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-            disabled={loading}
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Guardando...
-              </>
-            ) : (
-              "Guardar Cambios"
-            )}
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Guardando...
+            </>
+          ) : (
+            "Guardar Cambios"
+          )}
+        </button>
       </div>
 
       <div className="space-y-8">
