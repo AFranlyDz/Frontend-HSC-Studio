@@ -112,8 +112,8 @@ export const EditarRasgosClinicosForm = ({ onCancel }) => {
           promesas.push(
             axios
               .post(`${apiUrl}rasgos_clinicos_globales/`, {
-                historia_clinica_id: paciente.id,
-                codificador_id: Number.parseInt(codificadorId),
+                historia_clinica: paciente.id,
+                codificador: Number.parseInt(codificadorId),
                 notas: notas[codificadorId] || "",
               })
               .then((response) => console.log(`Añadido nuevo rasgo clínico:`, response.data))
@@ -135,8 +135,8 @@ export const EditarRasgosClinicosForm = ({ onCancel }) => {
               promesas.push(
                 axios
                   .put(`${apiUrl}rasgos_clinicos_globales/${asociacionId}/`, {
-                    historia_clinica_id: paciente.id,
-                    codificador_id: Number.parseInt(codificadorId),
+                    historia_clinica: paciente.id,
+                    codificador: Number.parseInt(codificadorId),
                     notas: notas[codificadorId] || "",
                   })
                   .then((response) =>
