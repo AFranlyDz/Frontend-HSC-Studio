@@ -162,6 +162,7 @@ function RevisionCasos() {
             onClick={() => handleVerMas(row)}
             className="p-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
             title="Ver detalles"
+            style={{ backgroundColor: "#3b82f6" }}
           >
             <Eye size={16} />
           </button>
@@ -169,6 +170,7 @@ function RevisionCasos() {
             onClick={() => handleEditar(row)}
             className="p-1.5 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
             title="Editar"
+            style={{ backgroundColor: "#eab308" }}
           >
             <Edit size={16} />
           </button>
@@ -176,6 +178,7 @@ function RevisionCasos() {
             onClick={() => handleBorrar(row.id)}
             className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
             title="Eliminar"
+            style={{ backgroundColor: "#ef4444" }}
           >
             <Trash2 size={16} />
           </button>
@@ -184,10 +187,10 @@ function RevisionCasos() {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
-      grow: 2, // Más espacio para los botones de acción
+      grow: 2,
       center: true,
-      minWidth: "180px",
-      maxWidth: "220px",
+      minWidth: "230px", // Aumentado de 200px
+      maxWidth: "300px", // Aumentado de 250px
     },
   ]
 

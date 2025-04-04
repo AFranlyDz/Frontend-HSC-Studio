@@ -23,5 +23,30 @@
 .rdt_TableCol:last-child,
 .rdt_TableCell:last-child {
   justify-content: center !important;
+  min-width: 230px !important; /* Garantizar ancho mínimo para botones */
+  padding: 0 10px !important;
+}
+
+/* Asegurar que los botones en la columna de acciones sean visibles */
+.rdt_TableCell:last-child button {
+  margin: 0 2px;
+}
+
+/* Corregir el color de fondo de los botones para que contrasten */
+.rdt_TableCell:last-child button.bg-blue-500 {
+  background-color: #3b82f6 !important;
+}
+
+.rdt_TableCell:last-child button.bg-yellow-500 {
+  background-color: #eab308 !important;
+}
+
+.rdt_TableCell:last-child button.bg-red-500 {
+  background-color: #ef4444 !important;
+}
+
+/* Asegurar que el texto de los botones sea visible */
+.rdt_TableCell:last-child button {
+  color: white !important;
 }
 
