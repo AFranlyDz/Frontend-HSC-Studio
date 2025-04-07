@@ -5,13 +5,14 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { useFormatValue } from "@/hooks/useFormatValue"
 import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
-import { InfoField } from "@/components/InfoField"
+import { InfoField } from "@/components/shared/InfoField"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Edit, Save } from "lucide-react"
+import { ArrowLeft, Edit } from "lucide-react"
 import axios from "axios"
 import { useDispatch } from "react-redux"
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
+import { EpisodioForm } from "@/components/shared/EpisodioForm"
 
 function EpisodioDetail() {
   const location = useLocation()
@@ -21,7 +22,6 @@ function EpisodioDetail() {
   const { formatValue } = useFormatValue()
   const [episodio, setEpisodio] = useState(initialEpisodio)
   const [editing, setEditing] = useState(false)
-  const [formData, setFormData] = useState({})
   const [loading, setLoading] = useState(false)
   const apiUrl = import.meta.env.VITE_API_BACKEND
 
@@ -55,18 +55,6 @@ function EpisodioDetail() {
 
   // Iniciar edición
   const handleEdit = () => {
-    // Formatear fechas para el input date
-    const formatDate = (dateString) => {
-      if (!dateString) return ""
-      const date = new Date(dateString)
-      return date.toISOString().split("T")[0]
-    }
-
-    setFormData({
-      ...episodio,
-      inicio: formatDate(episodio.inicio),
-      fecha_alta: formatDate(episodio.fecha_alta),
-    })
     setEditing(true)
   }
 
@@ -75,32 +63,18 @@ function EpisodioDetail() {
     setEditing(false)
   }
 
-  // Manejar cambios en el formulario
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-
-    let newValue = value
-    if (type === "checkbox") {
-      newValue = checked
-    } else if (type === "number") {
-      newValue = Number.parseInt(value)
-    } else if (name === "estado_al_egreso") {
-      newValue = value === "true"
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: newValue,
-    }))
-  }
-
   // Guardar cambios
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handleSubmit = async (formData) => {
     setLoading(true)
 
     try {
-      const response = await axios.put(`${apiUrl}episodios/${episodio.id}/`, formData)
+      // Asegurarse de que el ID de la historia clínica esté incluido
+      const dataToSend = {
+        ...formData,
+        historia_clinica: paciente.id,
+      }
+
+      const response = await axios.put(`${apiUrl}episodios/${episodio.id}/`, dataToSend)
 
       // Actualizar el estado local
       setEpisodio(response.data)
@@ -124,75 +98,28 @@ function EpisodioDetail() {
     {
       label: "Fecha de inicio",
       key: "inicio",
-      type: "date",
       format: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
     },
     {
       label: "Fecha de alta",
       key: "fecha_alta",
-      type: "date",
       format: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
     },
-    { label: "Tiempo de estadía (días)", key: "tiempo_estadia", type: "number" },
+    { label: "Tiempo de estadía (días)", key: "tiempo_estadia" },
     {
       label: "Estado al egreso",
       key: "estado_al_egreso",
-      type: "select",
       format: (value) => (value ? "Favorable" : "Desfavorable"),
-      options: [
-        { value: true, label: "Favorable" },
-        { value: false, label: "Desfavorable" },
-      ],
     },
-    { label: "Tiempo de antecedente (días)", key: "tiempo_antecedente", type: "number" },
-    { label: "Edad del paciente", key: "edad_paciente", type: "number" },
+    { label: "Tiempo de antecedente (días)", key: "tiempo_antecedente" },
+    { label: "Edad del paciente", key: "edad_paciente" },
   ]
 
   // Campos de texto largo
   const camposTexto = [
-    { label: "Descripción del antecedente", key: "descripcion_antecedente", type: "textarea" },
-    { label: "Observaciones", key: "observaciones", type: "textarea" },
+    { label: "Descripción del antecedente", key: "descripcion_antecedente" },
+    { label: "Observaciones", key: "observaciones" },
   ]
-
-  // Renderizar campo según su tipo
-  const renderField = (campo) => {
-    if (campo.type === "select") {
-      return (
-        <select
-          name={campo.key}
-          value={formData[campo.key].toString()}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-        >
-          {campo.options.map((option) => (
-            <option key={option.value.toString()} value={option.value.toString()}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      )
-    } else if (campo.type === "textarea") {
-      return (
-        <textarea
-          name={campo.key}
-          value={formData[campo.key] || ""}
-          onChange={handleChange}
-          rows="3"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-        ></textarea>
-      )
-    } else {
-      return (
-        <input
-          type={campo.type}
-          name={campo.key}
-          value={formData[campo.key] || ""}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-        />
-      )
-    }
-  }
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-gray-50">
@@ -225,60 +152,14 @@ function EpisodioDetail() {
             </div>
 
             {editing ? (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Información del Episodio</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {campos.map((campo) => (
-                        <div key={campo.key} className="mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                          <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                            {campo.label}
-                          </label>
-                          {renderField(campo)}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Descripción y Observaciones</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {camposTexto.map((campo) => (
-                        <div key={campo.key} className="mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                          <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                            {campo.label}
-                          </label>
-                          {renderField(campo)}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <div className="flex justify-end space-x-2 mt-6">
-                  <Button type="button" variant="outline" onClick={handleCancel} disabled={loading}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">
-                    {loading ? (
-                      <>
-                        <span className="animate-spin mr-2">⟳</span> Guardando...
-                      </>
-                    ) : (
-                      <>
-                        <Save size={16} className="mr-2" /> Guardar Cambios
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </form>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Editar Episodio</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EpisodioForm initialData={episodio} onSubmit={handleSubmit} isLoading={loading} />
+                </CardContent>
+              </Card>
             ) : (
               <div className="space-y-6">
                 {/* Información básica del episodio */}

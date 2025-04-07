@@ -67,7 +67,7 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
             name="inicio"
             value={formData.inicio}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none text-gray-700 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -81,7 +81,7 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
             name="fecha_alta"
             value={formData.fecha_alta}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none text-gray-700 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -96,7 +96,7 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
             value={formData.tiempo_estadia}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -111,7 +111,7 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
             value={formData.edad_paciente}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -126,7 +126,7 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
             value={formData.tiempo_antecedente}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -137,7 +137,7 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
             name="estado_al_egreso"
             checked={formData.estado_al_egreso}
             onChange={handleChange}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500  border-gray-300 rounded"
           />
           <label htmlFor="estado_al_egreso" className="ml-2 block text-sm font-medium text-gray-700">
             Estado favorable al egreso
@@ -155,7 +155,7 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
           value={formData.descripcion_antecedente}
           onChange={handleChange}
           rows="2"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         ></textarea>
       </div>
 
@@ -169,7 +169,7 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
           value={formData.observaciones}
           onChange={handleChange}
           rows="3"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         ></textarea>
       </div>
 

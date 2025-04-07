@@ -4,7 +4,7 @@ import axios from "axios"
 import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { Plus, Trash2, Eye } from "lucide-react"
+import { Plus, Edit, Trash2, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Modal } from "@/components/ui/modal"
 import { EmptyState } from "./EmptyState"
@@ -15,12 +15,14 @@ import DataTable from "@/components/layout/DatatableBase"
 export const EpisodiosPanel = () => {
   const { datos: paciente } = useSelector((state) => state.historiaClinica)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [loading, setLoading] = useState(false)
   const [selectedEpisodio, setSelectedEpisodio] = useState(null)
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const apiUrl = import.meta.env.VITE_API_BACKEND
 
+  // Crear un nuevo episodio
   const handleCreate = async (formData) => {
     setLoading(true)
     try {
@@ -47,12 +49,47 @@ export const EpisodiosPanel = () => {
     }
   }
 
+  // Abrir modal para editar episodio
+  const handleEdit = (episodio) => {
+    setSelectedEpisodio(episodio)
+    setShowEditModal(true)
+  }
+
+  // Actualizar un episodio existente
+  const handleUpdate = async (formData) => {
+    setLoading(true)
+    try {
+      // Asegurarse de que el ID de la historia clínica esté incluido
+      const dataToSend = {
+        ...formData,
+        historia_clinica: paciente.id,
+      }
+
+      const response = await axios.put(`${apiUrl}episodios/${formData.id}/`, dataToSend)
+
+      // Actualizar el estado local
+      const episodiosActualizados = paciente.episodios.map((ep) => (ep.id === formData.id ? response.data : ep))
+      const pacienteActualizado = { ...paciente, episodios: episodiosActualizados }
+      dispatch(setHistoriaClinica(pacienteActualizado))
+
+      setShowEditModal(false)
+      alert("Episodio actualizado correctamente")
+    } catch (error) {
+      console.error("Error al actualizar el episodio:", error)
+      alert("Error al actualizar el episodio")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Ver detalles de un episodio
   const handleVerDetalle = (episodio) => {
     navigate("/Revision_casos/HistoriaClinica/Episodio", {
       state: { episodio, paciente },
     })
   }
 
+  // Eliminar un episodio
   const handleBorrar = async (id) => {
     if (confirm("¿Estás seguro de eliminar este episodio?")) {
       setLoading(true)
@@ -117,6 +154,14 @@ export const EpisodiosPanel = () => {
             <Eye size={16} />
           </button>
           <button
+            onClick={() => handleEdit(row)}
+            className="p-1.5 rounded hover:bg-yellow-600 transition-colors"
+            title="Editar"
+            style={{ backgroundColor: "#eab308", color: "white" }}
+          >
+            <Edit size={16} />
+          </button>
+          <button
             onClick={() => handleBorrar(row.id)}
             className="p-1.5 rounded hover:bg-red-600 transition-colors"
             title="Eliminar"
@@ -170,6 +215,11 @@ export const EpisodiosPanel = () => {
       {/* Modal para agregar episodio */}
       <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Agregar Episodio" size="lg">
         <EpisodioForm onSubmit={handleCreate} isLoading={loading} />
+      </Modal>
+
+      {/* Modal para editar episodio */}
+      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Episodio" size="lg">
+        <EpisodioForm initialData={selectedEpisodio} onSubmit={handleUpdate} isLoading={loading} />
       </Modal>
     </div>
   )
