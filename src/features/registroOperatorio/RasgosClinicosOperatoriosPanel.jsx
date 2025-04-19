@@ -1,104 +1,81 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Modal } from "@/components/ui/modal"
 import { EmptyState } from "@/components/shared/EmptyState"
-import axios from "axios"
-import { useSelector, useDispatch } from "react-redux"
-import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
-import DataTable from "@/components/layout/DatatableBase"
+import { RasgosClinicosOperatoriosSection } from "./RasgosClinicosOperatoriosSection"
+import { EditarRasgosClinicosOperatoriosForm } from "./EditarRasgosClinicosOperatoriosForm"
 
 export const RasgosClinicosOperatoriosPanel = ({ registroOperatorioId, rasgosClinicos }) => {
-  const { datos: paciente } = useSelector((state) => state.historiaClinica)
-  const dispatch = useDispatch()
-  const apiUrl = import.meta.env.VITE_API_BACKEND
+  const [editing, setEditing] = useState(false)
 
-  // Eliminar un rasgo clínico operatorio
-  const handleBorrar = async (id) => {
-    if (confirm("¿Estás seguro de eliminar este rasgo clínico operatorio?")) {
-      try {
-        await axios.delete(`${apiUrl}rasgos_clinicos_operatorios/${id}/`)
-
-        // Actualizar el estado local
-        const pacienteActualizado = {
-          ...paciente,
-          episodios: paciente.episodios.map(ep => ({
-            ...ep,
-            registro_operatorio: ep.registro_operatorio?.map(ro => 
-              ro.id === registroOperatorioId
-                ? {
-                    ...ro,
-                    rasgos_clinicos_operatorios: ro.rasgos_clinicos_operatorios?.filter(rco => rco.id !== id) || []
-                  }
-                : ro
-            ) || []
-          }))
-        }
-
-        dispatch(setHistoriaClinica(pacienteActualizado))
-        alert("Rasgo clínico operatorio eliminado correctamente")
-      } catch (error) {
-        console.error("Error al eliminar:", error)
-        alert("Error al eliminar el rasgo clínico operatorio")
-      }
-    }
-  }
-
-  // Columnas para la tabla
-  const columns = [
-    {
-      name: "Nombre",
-      selector: (row) => row.codificador.nombre,
-      sortable: true,
-      grow: 2,
-    },
-    {
-      name: "Clasificación",
-      selector: (row) => row.codificador.clasificacion,
-      sortable: true,
-      grow: 2,
-    },
-    {
-      name: "Acciones",
-      cell: (row) => (
-        <button
-          onClick={() => handleBorrar(row.id)}
-          className="p-1.5 rounded hover:bg-red-600 transition-colors"
-          title="Eliminar"
-          style={{ backgroundColor: "#ef4444", color: "white" }}
-        >
-          <Trash2 size={16} />
-        </button>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-      center: true,
-    },
+  // Clasificaciones de rasgos clínicos operatorios
+  const clasificaciones = [
+    "Tratamiento Quírurgico",
+    "Complicaciones Médicas", 
+    "Complicaciones Cirugía"
   ]
 
-  return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-        <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-        Rasgos Clínicos Operatorios
-      </h2>
+  const hasRasgos = rasgosClinicos && rasgosClinicos.length > 0
 
-      {rasgosClinicos.length > 0 ? (
-        <div className="bg-white rounded-lg shadow w-full overflow-hidden">
-          <DataTable
-            columns={columns}
-            data={rasgosClinicos}
-            pagination
-            paginationPerPage={5}
-            highlightOnHover
-            noDataComponent={<div className="p-4 text-center text-gray-500">No hay rasgos clínicos operatorios</div>}
-          />
-        </div>
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 w-full">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-gray-800 flex items-center">
+          <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+          Rasgos Clínicos Operatorios
+        </h2>
+        <button
+          onClick={() => setEditing(!editing)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center"
+        >
+          <span className="mr-1">{editing ? "Cancelar" : "Editar"}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            {editing ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
+            )}
+          </svg>
+        </button>
+      </div>
+
+      {editing ? (
+        <EditarRasgosClinicosOperatoriosForm 
+          registroOperatorioId={registroOperatorioId}
+          rasgosClinicos={rasgosClinicos}
+          onCancel={() => setEditing(false)} 
+        />
+      ) : !hasRasgos ? (
+        <EmptyState message="No existen rasgos clínicos operatorios registrados" />
       ) : (
-        <EmptyState message="No existen rasgos clínicos operatorios para este registro" />
+        <div className="space-y-8 w-full">
+          {clasificaciones.map((clasificacion) => {
+            const items = rasgosClinicos.filter(
+              (item) => item.codificador.clasificacion === clasificacion
+            )
+            if (items.length > 0) {
+              return (
+                <RasgosClinicosOperatoriosSection 
+                  key={clasificacion} 
+                  title={clasificacion} 
+                  items={items} 
+                />
+              )
+            }
+            return null
+          })}
+        </div>
       )}
     </div>
   )
