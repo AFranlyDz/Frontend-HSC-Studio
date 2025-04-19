@@ -155,6 +155,7 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, registrosPo
       sortable: true,
       grow: 1,
       center: true,
+
     },
     {
       name: "Escala Oslo",
