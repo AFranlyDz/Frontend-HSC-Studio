@@ -203,7 +203,6 @@ export const RegistroOperatorioPanel = ({ episodioId }) => {
                 JSON.stringify(episodio)
               );
               navigate(
-                // `/Revision_casos/HistoriaClinica/RegistroOperatorio/${row.id}`
                 "/Revision_casos/HistoriaClinica/Episodio/RegistroOperatorio"
               );
             }}
