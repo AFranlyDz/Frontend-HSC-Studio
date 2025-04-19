@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 
-export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
+export function EpisodioForm({ initialData, onSubmit, isLoading, onCancel }) {
+  // Estado inicial del formulario
   const [formData, setFormData] = useState({
     inicio: "",
     fecha_alta: "",
@@ -15,40 +16,36 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
     observaciones: "",
   })
 
-  // Cargar datos iniciales si existen
+  // Actualizar el formulario si cambian los datos iniciales
   useEffect(() => {
     if (initialData) {
-      // Formatear fechas para el input date
-      const formatDate = (dateString) => {
-        if (!dateString) return ""
-        const date = new Date(dateString)
-        return date.toISOString().split("T")[0]
-      }
-
       setFormData({
-        id: initialData.id,
-        inicio: formatDate(initialData.inicio),
-        fecha_alta: formatDate(initialData.fecha_alta),
-        tiempo_estadia: initialData.tiempo_estadia || 0,
-        estado_al_egreso: initialData.estado_al_egreso,
-        tiempo_antecedente: initialData.tiempo_antecedente || 0,
-        descripcion_antecedente: initialData.descripcion_antecedente || "",
-        edad_paciente: initialData.edad_paciente || 0,
-        observaciones: initialData.observaciones || "",
+        ...initialData,
       })
     }
   }, [initialData])
 
-  // Manejar cambios en los campos
+  // Manejar cambios en los campos del formulario
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }))
+
+    // Manejar diferentes tipos de inputs
+    let newValue
+    if (type === "checkbox") {
+      newValue = checked
+    } else if (type === "number") {
+      newValue = value ? Number.parseInt(value) : 0
+    } else {
+      newValue = value
+    }
+
+    setFormData({
+      ...formData,
+      [name]: newValue,
+    })
   }
 
-  // Manejar envío del formulario
+  // Enviar el formulario
   const handleSubmit = (e) => {
     e.preventDefault()
     onSubmit(formData)
@@ -57,131 +54,117 @@ export const EpisodioForm = ({ initialData = null, onSubmit, isLoading }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Fecha de inicio */}
         <div>
-          <label htmlFor="inicio" className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha de inicio
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de inicio</label>
           <input
             type="date"
-            id="inicio"
             name="inicio"
-            value={formData.inicio}
+            value={formData.inicio || ""}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none text-gray-700 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
+        {/* Fecha de alta */}
         <div>
-          <label htmlFor="fecha_alta" className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha de alta
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de alta</label>
           <input
             type="date"
-            id="fecha_alta"
             name="fecha_alta"
-            value={formData.fecha_alta}
+            value={formData.fecha_alta || ""}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none text-gray-700 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
+        {/* Tiempo de estadía */}
         <div>
-          <label htmlFor="tiempo_estadia" className="block text-sm font-medium text-gray-700 mb-1">
-            Tiempo de estadía (días)
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo de estadía (días)</label>
           <input
             type="number"
-            id="tiempo_estadia"
             name="tiempo_estadia"
-            value={formData.tiempo_estadia}
+            value={formData.tiempo_estadia || 0}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
+        {/* Estado al egreso */}
         <div>
-          <label htmlFor="edad_paciente" className="block text-sm font-medium text-gray-700 mb-1">
-            Edad del paciente
-          </label>
-          <input
-            type="number"
-            id="edad_paciente"
-            name="edad_paciente"
-            value={formData.edad_paciente}
-            onChange={handleChange}
-            min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="tiempo_antecedente" className="block text-sm font-medium text-gray-700 mb-1">
-            Tiempo de antecedente (días)
-          </label>
-          <input
-            type="number"
-            id="tiempo_antecedente"
-            name="tiempo_antecedente"
-            value={formData.tiempo_antecedente}
-            onChange={handleChange}
-            min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="estado_al_egreso"
+          <label className="block text-sm font-medium text-gray-700 mb-1">Estado al egreso</label>
+          <select
             name="estado_al_egreso"
-            checked={formData.estado_al_egreso}
+            value={formData.estado_al_egreso.toString()}
             onChange={handleChange}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500  border-gray-300 rounded"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="true">Favorable</option>
+            <option value="false">Desfavorable</option>
+          </select>
+        </div>
+
+        {/* Tiempo de antecedente */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo de antecedente (días)</label>
+          <input
+            type="number"
+            name="tiempo_antecedente"
+            value={formData.tiempo_antecedente || 0}
+            onChange={handleChange}
+            min="0"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <label htmlFor="estado_al_egreso" className="ml-2 block text-sm font-medium text-gray-700">
-            Estado favorable al egreso
-          </label>
+        </div>
+
+        {/* Edad del paciente */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Edad del paciente</label>
+          <input
+            type="number"
+            name="edad_paciente"
+            value={formData.edad_paciente || 0}
+            onChange={handleChange}
+            min="0"
+            max="120"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Descripción del antecedente */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Descripción del antecedente</label>
+          <textarea
+            name="descripcion_antecedente"
+            value={formData.descripcion_antecedente || ""}
+            onChange={handleChange}
+            rows="3"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          ></textarea>
+        </div>
+
+        {/* Observaciones */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+          <textarea
+            name="observaciones"
+            value={formData.observaciones || ""}
+            onChange={handleChange}
+            rows="3"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          ></textarea>
         </div>
       </div>
 
-      <div>
-        <label htmlFor="descripcion_antecedente" className="block text-sm font-medium text-gray-700 mb-1">
-          Descripción del antecedente
-        </label>
-        <textarea
-          id="descripcion_antecedente"
-          name="descripcion_antecedente"
-          value={formData.descripcion_antecedente}
-          onChange={handleChange}
-          rows="2"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        ></textarea>
-      </div>
-
-      <div>
-        <label htmlFor="observaciones" className="block text-sm font-medium text-gray-700 mb-1">
-          Observaciones
-        </label>
-        <textarea
-          id="observaciones"
-          name="observaciones"
-          value={formData.observaciones}
-          onChange={handleChange}
-          rows="3"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        ></textarea>
-      </div>
-
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={() => window.history.back()} disabled={isLoading}>
+      <div className="flex justify-end space-x-3 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
           Cancelar
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Guardando..." : initialData ? "Actualizar" : "Guardar"}
+          {isLoading ? "Guardando..." : initialData?.id ? "Actualizar" : "Guardar"}
         </Button>
       </div>
     </form>
   )
 }
-

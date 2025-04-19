@@ -205,4 +205,3 @@ export function HistoriaClinicaForm({ initialData, onSubmit, isLoading }) {
     </form>
   )
 }
-

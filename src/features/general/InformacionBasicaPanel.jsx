@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { InfoField } from "./InfoField"
+import { InfoField } from "@/components/shared/InfoField"
 import { useFormatValue } from "@/hooks/useFormatValue"
 import { Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -261,4 +261,3 @@ Por favor, tome nota de este dato.`,
     </div>
   )
 }
-
