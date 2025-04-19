@@ -1,0 +1,24 @@
+/* Estilos para el layout de la aplicación */
+
+/* Asegurar que el z-index del footer sea mayor que el del sidebar */
+footer {
+  z-index: 50 !important;
+  position: relative;
+}
+
+/* Ajustar el espacio para el contenido principal */
+.main-content {
+  min-height: calc(100vh - 64px);
+  padding-bottom: 100px; /* Espacio para que el footer no tape el contenido */
+}
+
+/* Asegurar que el sidebar no tape el footer */
+.sidebar-fixed {
+  z-index: 30;
+}
+
+/* Estilos para el footer */
+.footer-container {
+  width: 100%;
+  z-index: 50;
+}

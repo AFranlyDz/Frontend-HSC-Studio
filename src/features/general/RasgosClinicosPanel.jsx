@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { useSelector } from "react-redux"
-import { EmptyState } from "./EmptyState"
-import { RasgosClinicosSection } from "./RasgosClinicosSection"
-import { EditarRasgosClinicosForm } from "./EditarRasgosClinicosForm"
+import { EmptyState } from "@/components/shared/EmptyState"
+import { RasgosClinicosSection } from "@/components/shared/RasgosClinicosSection"
+import { EditarRasgosClinicosForm } from "@/components/shared/EditarRasgosClinicosForm"
 
 export const RasgosClinicosPanel = () => {
   const { datos } = useSelector((state) => state.historiaClinica)

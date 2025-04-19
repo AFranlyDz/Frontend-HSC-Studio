@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom"
 import { Plus, Edit, Trash2, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Modal } from "@/components/ui/modal"
-import { EmptyState } from "./EmptyState"
-import { EpisodioForm } from "./EpisodioForm"
+import { EmptyState } from "@/components/shared/EmptyState"
+import { EpisodioForm } from "@/components/shared/EpisodioForm"
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
 import DataTable from "@/components/layout/DatatableBase"
 
@@ -84,9 +84,12 @@ export const EpisodiosPanel = () => {
 
   // Ver detalles de un episodio
   const handleVerDetalle = (episodio) => {
-    navigate("/Revision_casos/HistoriaClinica/Episodio", {
-      state: { episodio, paciente },
-    })
+    // Guardar el episodio y el paciente en sessionStorage
+    sessionStorage.setItem("selectedEpisodio", JSON.stringify(episodio))
+    sessionStorage.setItem("selectedPaciente", JSON.stringify(paciente))
+
+    // Navegar a la página de detalle
+    navigate("/Revision_casos/HistoriaClinica/Episodio")
   }
 
   // Eliminar un episodio
@@ -224,4 +227,3 @@ export const EpisodiosPanel = () => {
     </div>
   )
 }
-

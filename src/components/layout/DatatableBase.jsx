@@ -62,4 +62,3 @@ function DataTableBase(props) {
 }
 
 export default DataTableBase
-
