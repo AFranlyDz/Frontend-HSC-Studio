@@ -15,6 +15,7 @@ import { EpisodioForm } from "@/components/shared/EpisodioForm";
 import { CustomTabs } from "@/components/shared/CustomTabs";
 import { RasgosClinicosEpisodioPanel } from "@/features/gestionarEpisodio/RasgosClinicosEpisodioPanel";
 import {RegistroOperatorioPanel} from "@/features/registroOperatorio/RegistroOperatorioPanel"
+import { HematomasSubduralesPanel } from "@/features/hematoma/HematomasSubduralesPanel";
 
 function EpisodioDetail() {
   const navigate = useNavigate();
@@ -204,6 +205,10 @@ function EpisodioDetail() {
     {
       label: "Registro Operatorio",
       content: <RegistroOperatorioPanel episodioId={episodio.id}/>,
+    },
+    {
+      label: "Hematomas Subdurales",
+      content: <HematomasSubduralesPanel episodioId={episodio.id} />,
     },
   ];
 

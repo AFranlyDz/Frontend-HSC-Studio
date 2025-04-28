@@ -7,6 +7,7 @@ import HistoriaClinicaDetail from "@/pages/historiaClinica/HistoriaClinicaDetail
 import EpisodioDetail from "@/pages/historiaClinica/EpisodioDetail"
 import RegistroOperatorioDetail from "@/pages/historiaClinica/RegistroOperatorioDetail"
 import RegistroPosoperatorioDetail from "@/pages/historiaClinica/RegistroPosoperatorioDetail"
+import HematomaSubduralDetail from "@/pages/historiaClinica/HematomaSubduralDetail"
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/Revision_casos/HistoriaClinica/Episodio" element={<EpisodioDetail />} />
         <Route path="/Revision_casos/HistoriaClinica/Episodio/RegistroOperatorio" element={<RegistroOperatorioDetail/>}/>
         <Route path="/Revision_casos/HistoriaClinica/Episodio/RegistroOperatorio/RegistroPosoperatorio" element={<RegistroPosoperatorioDetail/>}/>
+        <Route path="/Revision_casos/HistoriaClinica/Episodio/Hematoma" element={<HematomaSubduralDetail/>}/>
       </Routes>
     </Router>
   )
