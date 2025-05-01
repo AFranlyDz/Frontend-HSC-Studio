@@ -11,7 +11,7 @@ const selectProps = { indeterminate: (isIndeterminate) => isIndeterminate }
 function convertArrayOfObjectsToCSV(data) {
   let result
 
-  const columnDelimiter = ','
+  const columnDelimiter = ';'
   const lineDelimiter = '\n'
   const keys = Object.keys(data[0])
 
