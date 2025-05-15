@@ -35,7 +35,7 @@ export const ExportButton = () => {
           padding: "8px 16px",
         }}
       >
-        Exportar base de conocimiento como CSV
+        Exportar base de datos como CSV
       </Button>
 
       <Modal

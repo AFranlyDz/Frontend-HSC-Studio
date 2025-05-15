@@ -9,6 +9,7 @@ import { Sidebar } from "./Sidebar";
 import { Toolbar } from "./ToolBar";
 import { ExportButton } from "@/components/ui/ExportButton";
 import PDFDownloadButton from "@/features/exportaciones/PDFDownloadButton"
+import {ExportKBButton} from "@/components/ui/ExportKBButton.jsx";
 
 export const HistoriaClinicaLayout = ({ children, title }) => {
   const { datos: paciente } = useSelector((state) => state.historiaClinica);
@@ -60,6 +61,7 @@ export const HistoriaClinicaLayout = ({ children, title }) => {
           <section className="py-8 bg-gradient-to-b from-gray-100 to-white w-full flex-grow">
             <Toolbar className="">
               <ExportButton />
+              <ExportKBButton/>
               <PDFDownloadButton/>
             </Toolbar>
             <div className="container mx-auto px-4">
