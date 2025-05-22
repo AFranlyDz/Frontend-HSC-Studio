@@ -19,6 +19,7 @@ export const ExportKBButton = () => {
         `${apiUrl}export-kb-csv/`,
         {
           fields: [
+            'historia_clinica.id',
             "historia_clinica.numero",
             "historia_clinica.nombre",
             "historia_clinica.apellidos",
