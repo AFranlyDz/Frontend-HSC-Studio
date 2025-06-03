@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ export const HistoriaClinicaLayout = ({ children, title }) => {
     }
   }, [paciente, navigate]);
 
+
   // Controlar la visibilidad del footer basado en el scroll
   useEffect(() => {
     const handleScroll = () => {
@@ -41,6 +43,7 @@ export const HistoriaClinicaLayout = ({ children, title }) => {
   // Calcular la altura del header para el padding-top
   const headerHeight = "64px";
 
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-gray-50">
       {/* Header ya está fijo en su propio componente */}
@@ -49,16 +52,19 @@ export const HistoriaClinicaLayout = ({ children, title }) => {
       {/* Contenedor principal que comienza debajo del header */}
       <div className="flex" style={{ paddingTop: headerHeight }}>
         {/* Sidebar fijo */}
+
         <div
           className="fixed left-0 h-[calc(100vh-64px)] w-64 overflow-y-auto z-30"
           style={{ top: headerHeight }}
         >
+
           <Sidebar />
         </div>
 
         {/* Contenido principal con margen izquierdo para dejar espacio al sidebar */}
         <main className="flex-grow ml-64 flex flex-col min-h-screen">
           <section className="py-8 bg-gradient-to-b from-gray-100 to-white w-full flex-grow">
+
             <Toolbar className="">
               <ExportButton />
               <ExportKBButton/>
@@ -70,15 +76,18 @@ export const HistoriaClinicaLayout = ({ children, title }) => {
                   <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
                     {title}
                   </h1>
+
                   {paciente && paciente.id && (
                     <div className="flex items-center text-lg text-blue-600 font-medium">
                       <span>
                         {paciente.nombre} {paciente.apellidos}
                       </span>
                       <span className="mx-2">•</span>
+
                       <span className="text-gray-500 text-base">
                         ID: {paciente.numero || "N/A"}
                       </span>
+
                     </div>
                   )}
                 </div>
@@ -90,6 +99,7 @@ export const HistoriaClinicaLayout = ({ children, title }) => {
           </section>
 
           {/* Footer que aparece después de un pequeño scroll */}
+
         </main>
       </div>
       {showFooter && (
@@ -100,3 +110,4 @@ export const HistoriaClinicaLayout = ({ children, title }) => {
     </div>
   );
 };
+

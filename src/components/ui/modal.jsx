@@ -70,6 +70,7 @@ export function Modal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto"
       onClick={handleBackdropClick}
     >
+
       <div 
         ref={modalRef}
         className={cn(
@@ -87,6 +88,7 @@ export function Modal({
             className="text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
             aria-label="Cerrar modal"
           >
+
             <X size={20} />
           </button>
         </div>

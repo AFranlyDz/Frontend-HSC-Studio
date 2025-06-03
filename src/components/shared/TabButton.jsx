@@ -9,6 +9,7 @@ export const TabButton = ({ isActive, onClick, children }) => {
         isActive
           ? "bg-white border-t-2 border-blue-600 text-blue-600 shadow-sm"
           : "hover:text-white border-b-2 border-transparent hover:border-gray-300"
+
       }`}
     >
       {children}

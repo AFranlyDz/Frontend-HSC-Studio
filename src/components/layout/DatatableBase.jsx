@@ -1,8 +1,10 @@
 import DataTable from "react-data-table-component"
 import Checkbox from "@mui/material/Checkbox"
 import ArrowDownward from "@mui/icons-material/ArrowDownward"
+
 import Button from "@mui/material/Button" // Importamos el componente Button de MUI
 import React from "react"
+
 
 const sortIcon = <ArrowDownward />
 const selectProps = { indeterminate: (isIndeterminate) => isIndeterminate }
@@ -68,7 +70,9 @@ const customStyles = {
   table: {
     style: {
       width: "100%",
+
       tableLayout: "fixed",
+
     },
   },
   headRow: {
@@ -119,11 +123,15 @@ function DataTableBase(props) {
         selectableRowsComponent={Checkbox}
         selectableRowsComponentProps={selectProps}
         sortIcon={sortIcon}
+
         actions={actionsMemo}
+
         {...props}
       />
     </div>
   )
 }
 
+
 export default DataTableBase
+
