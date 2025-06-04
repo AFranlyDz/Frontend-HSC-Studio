@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice";
 import axios from "axios";
-import { CheckCircle, XCircle, Heart, AlertTriangle } from "lucide-react"
+import { CheckCircle, XCircle, Heart, AlertTriangle } from "lucide-react";
+import { CompactPredictionBadge } from "@/features/registroOperatorio/CompactPredictionBadge";
 
 export const EditarRasgosClinicosOperatoriosForm = ({
   registroOperatorioId,
@@ -81,7 +82,7 @@ export const EditarRasgosClinicosOperatoriosForm = ({
       }
     };
     fetchData();
-  }, [apiUrl]);
+  }, [apiUrl, paciente.id]);
 
   // Manejar cambio en checkbox
   const handleCheckboxChange = (codificadorId) => {
@@ -253,51 +254,47 @@ export const EditarRasgosClinicosOperatoriosForm = ({
                       key={codificador.id}
                       className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
                     >
-                      <div className="flex items-start">
+                      <div className="flex items-start gap-3">
                         <input
                           type="checkbox"
                           id={`codificador-${codificador.id}`}
                           checked={!!rasgosSeleccionados[codificador.id]}
                           onChange={() => handleCheckboxChange(codificador.id)}
-                          className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          className="mt-0.5 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                         />
-                        {clasificacion === "Tratamiento Quírurgico" ? (
+                        <div className="flex-1 min-w-0">
                           <label
                             htmlFor={`codificador-${codificador.id}`}
-                            className="ml-2 block"
+                            className="cursor-pointer block"
                           >
-                            <div className="font-medium text-gray-800">
+                            <div className="font-medium text-gray-900 text-sm mb-1 leading-tight">
                               {codificador.nombre}
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {codificador.descripcion}
-                            </div>
-                            {recurrencias[index] && (
-                              <div className="text-sm text-gray-500">
-                                ¿Tendrá de recurrencia?:{" "}
-                                {recurrencias[index][0] === true ? "Sí" : "No"}
-                              </div>
-                            )}
-                            {estadosEgreso[index] && (
-                              <div className="text-sm text-gray-500">
-                                Posible estado al egreso:{" "}
-                                {estadosEgreso[index][0] === true ? "Vivo" : "Fallecido"}
-                              </div>
-                            )}
-                          </label>
-                        ) : (
-                          <label
-                            htmlFor={`codificador-${codificador.id}`}
-                            className="ml-2 block"
-                          >
-                            <div className="font-medium text-gray-800">
-                              {codificador.nombre}
-                            </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-xs text-gray-600 leading-relaxed mb-2 line-clamp-2">
                               {codificador.descripcion}
                             </div>
                           </label>
-                        )}
+
+                          {clasificacion === "Tratamiento Quírurgico" && (
+                            <div className="border-t border-gray-100 pt-2 space-y-1">
+                              {recurrencias[index] && (
+                                <CompactPredictionBadge
+                                  label="Recurrencia"
+                                  value={recurrencias[index][0]}
+                                  type="recurrence"
+                                />
+                              )}
+
+                              {estadosEgreso[index] && (
+                                <CompactPredictionBadge
+                                  label="Estado egreso"
+                                  value={estadosEgreso[index][0]}
+                                  type="discharge"
+                                />
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )
