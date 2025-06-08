@@ -177,7 +177,7 @@ function RegistroOperatorioDetail() {
       content: (
         <RasgosClinicosOperatoriosPanel 
           registroOperatorioId={registroOperatorio.id}
-          rasgosClinicos={registroOperatorio.rasgos_clinicos_operatorios || []}
+          RasgosClinicos={registroOperatorio.rasgos_clinicos_operatorios || []}
         />
       ),
     },
@@ -186,7 +186,7 @@ function RegistroOperatorioDetail() {
       content: (
         <RegistrosPosoperatoriosPanel 
           registroOperatorioId={registroOperatorio.id}
-          registrosPosoperatorios={registroOperatorio.registros_posoperatorios || []}
+          RegistrosPosoperatorios={registroOperatorio.registros_posoperatorios}
         />
       ),
     },

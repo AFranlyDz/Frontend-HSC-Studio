@@ -167,6 +167,11 @@ export const EditarRasgosClinicosOperatoriosForm = ({
       const response = await axios.get(
         `${apiUrl}gestionar_historia_clinica/${paciente.id}/`
       );
+      console.log('registro operatorio id: ', registroOperatorioId)
+      const rasgosOperatorios = await axios.get(
+        `${apiUrl}rasgos_operatorios_lectura/?registro_operatorio__id=${registroOperatorioId}`
+      );
+      
 
       // Actualizar en Redux
       dispatch(setHistoriaClinica(response.data));
@@ -175,7 +180,7 @@ export const EditarRasgosClinicosOperatoriosForm = ({
       alert("Rasgos clínicos operatorios actualizados correctamente");
 
       // Cancelar modo edición
-      onCancel();
+      onCancel(rasgosOperatorios.data);
     } catch (error) {
       console.error(
         "Error al actualizar los rasgos clínicos operatorios:",

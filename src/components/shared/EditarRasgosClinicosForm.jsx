@@ -165,7 +165,7 @@ export const EditarRasgosClinicosForm = ({ onCancel }) => {
       alert("Rasgos clínicos actualizados correctamente")
 
       // Cancelar modo edición
-      onCancel()
+      onCancel(response.data)
     } catch (error) {
       console.error("Error al actualizar los rasgos clínicos:", error)
       alert("Error al actualizar los rasgos clínicos. Por favor, intente nuevamente.")

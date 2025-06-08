@@ -200,7 +200,7 @@ function EpisodioDetail() {
     },
     {
       label: "Rasgos Clínicos",
-      content: <RasgosClinicosEpisodioPanel episodio={episodio} />,
+      content: <RasgosClinicosEpisodioPanel Episodio={episodio} />,
     },
     {
       label: "Registro Operatorio",

@@ -1,21 +1,46 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { EmptyState } from "@/components/shared/EmptyState"
-import { RasgosClinicosOperatoriosSection } from "./RasgosClinicosOperatoriosSection"
-import { EditarRasgosClinicosOperatoriosForm } from "./EditarRasgosClinicosOperatoriosForm"
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { RasgosClinicosOperatoriosSection } from "./RasgosClinicosOperatoriosSection";
+import { EditarRasgosClinicosOperatoriosForm } from "./EditarRasgosClinicosOperatoriosForm";
 
-export const RasgosClinicosOperatoriosPanel = ({ registroOperatorioId, rasgosClinicos }) => {
-  const [editing, setEditing] = useState(false)
+export const RasgosClinicosOperatoriosPanel = ({
+  registroOperatorioId,
+  RasgosClinicos,
+}) => {
+  const [editing, setEditing] = useState(false);
+  const [rasgosClinicos, setRasgosClinicos] = useState(RasgosClinicos);
+  const apiUrl = import.meta.env.VITE_API_BACKEND;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `${apiUrl}rasgos_operatorios_lectura/?registro_operatorio__id=${registroOperatorioId}`
+        );
+        setRasgosClinicos(response.data);
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      }
+    };
+    fetchData();
+  }, [registroOperatorioId, apiUrl]);	
 
   // Clasificaciones de rasgos clínicos operatorios
   const clasificaciones = [
     "Tratamiento Quírurgico",
-    "Complicaciones Médicas", 
-    "Complicaciones Cirugía"
-  ]
+    "Complicaciones Médicas",
+    "Complicaciones Cirugía",
+  ];
 
-  const hasRasgos = rasgosClinicos && rasgosClinicos.length > 0
+  const hasRasgos = rasgosClinicos && rasgosClinicos.length > 0;
+
+  const handleCancel = (actualizado) => {
+    setEditing(false);
+    setRasgosClinicos(actualizado);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 w-full">
@@ -37,7 +62,12 @@ export const RasgosClinicosOperatoriosPanel = ({ registroOperatorioId, rasgosCli
             stroke="currentColor"
           >
             {editing ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             ) : (
               <path
                 strokeLinecap="round"
@@ -51,10 +81,10 @@ export const RasgosClinicosOperatoriosPanel = ({ registroOperatorioId, rasgosCli
       </div>
 
       {editing ? (
-        <EditarRasgosClinicosOperatoriosForm 
+        <EditarRasgosClinicosOperatoriosForm
           registroOperatorioId={registroOperatorioId}
           rasgosClinicos={rasgosClinicos}
-          onCancel={() => setEditing(false)} 
+          onCancel={handleCancel}
         />
       ) : !hasRasgos ? (
         <EmptyState message="No existen rasgos clínicos operatorios registrados" />
@@ -63,20 +93,20 @@ export const RasgosClinicosOperatoriosPanel = ({ registroOperatorioId, rasgosCli
           {clasificaciones.map((clasificacion) => {
             const items = rasgosClinicos.filter(
               (item) => item.codificador.clasificacion === clasificacion
-            )
+            );
             if (items.length > 0) {
               return (
-                <RasgosClinicosOperatoriosSection 
-                  key={clasificacion} 
-                  title={clasificacion} 
-                  items={items} 
+                <RasgosClinicosOperatoriosSection
+                  key={clasificacion}
+                  title={clasificacion}
+                  items={items}
                 />
-              )
+              );
             }
-            return null
+            return null;
           })}
         </div>
       )}
     </div>
-  )
-}
+  );
+};

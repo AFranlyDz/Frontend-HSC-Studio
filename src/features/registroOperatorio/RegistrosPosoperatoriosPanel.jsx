@@ -1,150 +1,206 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Plus, Edit, Trash2, Eye } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Modal } from "@/components/ui/modal"
-import { EmptyState } from "@/components/shared/EmptyState"
-import { RegistroPosoperatorioForm } from "@/features/registroOperatorio/RegistroPosoperatorioForm"
-import { useSelector, useDispatch } from "react-redux"
-import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
+import { useState, useEffect } from "react";
+import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { RegistroPosoperatorioForm } from "@/features/registroOperatorio/RegistroPosoperatorioForm";
+import { useSelector, useDispatch } from "react-redux";
+import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice";
 import { useNavigate } from "react-router-dom";
-import DataTable from "@/components/layout/DatatableBase"
-import axios from "axios"
+import DataTable from "@/components/layout/DatatableBase";
+import axios from "axios";
 
-export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, registrosPosoperatorios }) => {
-  const { datos: paciente } = useSelector((state) => state.historiaClinica)
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [selectedRegistro, setSelectedRegistro] = useState(null)
+export const RegistrosPosoperatoriosPanel = ({
+  registroOperatorioId,
+  RegistrosPosoperatorios,
+}) => {
+  const { datos: reduxPaciente } = useSelector(
+    (state) => state.historiaClinica
+  );
+  const [paciente, setPaciente] = useState(reduxPaciente);
+  const [registrosPosoperatorios, setRegistrosPosoperatorios] = useState(
+    RegistrosPosoperatorios || []
+  );
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [selectedRegistro, setSelectedRegistro] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const apiUrl = import.meta.env.VITE_API_BACKEND
+  const apiUrl = import.meta.env.VITE_API_BACKEND;
+
+  useEffect(() => {console.log(RegistrosPosoperatorios)}, [])
+
+  function getRegistrosPosoperatorios(paciente, registroOperatorioId) {
+    return paciente.episodios.flatMap(
+      (episodio) =>
+        episodio.registro_operatorio
+          ?.filter((ro) => ro.id === registroOperatorioId)
+          ?.flatMap((ro) => ro.registros_posoperatorios || []) || []
+    );
+  }
 
   // Crear un nuevo registro posoperatorio
   const handleCreate = async (formData) => {
-    setLoading(true)
+    setLoading(true);
     try {
       const dataToSend = {
         ...formData,
         registro_operatorio: registroOperatorioId,
-      }
+      };
 
-      const response = await axios.post(`${apiUrl}registro_posoperatorio/`, dataToSend)
+      const response = await axios.post(
+        `${apiUrl}registro_posoperatorio/`,
+        dataToSend
+      );
 
       // Actualizar el estado local
       const pacienteActualizado = {
         ...paciente,
-        episodios: paciente.episodios.map(ep => ({
+        episodios: paciente.episodios.map((ep) => ({
           ...ep,
-          registro_operatorio: ep.registro_operatorio?.map(ro => 
-            ro.id === registroOperatorioId
-              ? {
-                  ...ro,
-                  registros_posoperatorios: [...(ro.registros_posoperatorios || []), response.data]
-                }
-              : ro
-          ) || []
-        }))
-      }
-
-      dispatch(setHistoriaClinica(pacienteActualizado))
-      setShowAddModal(false)
-      alert("Registro posoperatorio creado correctamente")
+          registro_operatorio:
+            ep.registro_operatorio?.map((ro) =>
+              ro.id === registroOperatorioId
+                ? {
+                    ...ro,
+                    registros_posoperatorios: [
+                      ...(ro.registros_posoperatorios || []),
+                      response.data,
+                    ],
+                  }
+                : ro
+            ) || [],
+        })),
+      };
+      dispatch(setHistoriaClinica(pacienteActualizado));
+      setShowAddModal(false);
+      alert("Registro posoperatorio creado correctamente");
+      setPaciente(pacienteActualizado);
+      const registrosPosop = getRegistrosPosoperatorios(
+        pacienteActualizado,
+        registroOperatorioId
+      );
+      setRegistrosPosoperatorios(registrosPosop);
     } catch (error) {
-      console.error("Error al crear el registro posoperatorio:", error)
-      alert("Error al crear el registro posoperatorio")
+      console.error("Error al crear el registro posoperatorio:", error);
+      alert("Error al crear el registro posoperatorio");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Abrir modal para editar registro
   const handleEdit = (registro) => {
-    setSelectedRegistro(registro)
-    setShowEditModal(true)
-  }
+    setSelectedRegistro(registro);
+    setShowEditModal(true);
+  };
 
   // Actualizar un registro existente
   const handleUpdate = async (formData) => {
-    setLoading(true)
+    setLoading(true);
     try {
       const dataToSend = {
         ...formData,
         registro_operatorio: registroOperatorioId,
-      }
+      };
 
-      const response = await axios.put(`${apiUrl}registro_posoperatorio/${formData.id}/`, dataToSend)
+      const response = await axios.put(
+        `${apiUrl}registro_posoperatorio/${formData.id}/`,
+        dataToSend
+      );
 
       // Actualizar el estado local
       const pacienteActualizado = {
         ...paciente,
-        episodios: paciente.episodios.map(ep => ({
+        episodios: paciente.episodios.map((ep) => ({
           ...ep,
-          registro_operatorio: ep.registro_operatorio?.map(ro => 
-            ro.id === registroOperatorioId
-              ? {
-                  ...ro,
-                  registros_posoperatorios: ro.registros_posoperatorios?.map(rp => 
-                    rp.id === formData.id ? response.data : rp
-                  ) || []
-                }
-              : ro
-          ) || []
-        }))
-      }
+          registro_operatorio:
+            ep.registro_operatorio?.map((ro) =>
+              ro.id === registroOperatorioId
+                ? {
+                    ...ro,
+                    registros_posoperatorios:
+                      ro.registros_posoperatorios?.map((rp) =>
+                        rp.id === formData.id ? response.data : rp
+                      ) || [],
+                  }
+                : ro
+            ) || [],
+        })),
+      };
 
-      dispatch(setHistoriaClinica(pacienteActualizado))
-      setShowEditModal(false)
-      alert("Registro posoperatorio actualizado correctamente")
+      dispatch(setHistoriaClinica(pacienteActualizado));
+      setShowEditModal(false);
+      setPaciente(pacienteActualizado);
+      const registrosPosop = getRegistrosPosoperatorios(
+        pacienteActualizado,
+        registroOperatorioId
+      );
+      setRegistrosPosoperatorios(registrosPosop);
+      alert("Registro posoperatorio actualizado correctamente");
     } catch (error) {
-      console.error("Error al actualizar el registro posoperatorio:", error)
-      alert("Error al actualizar el registro posoperatorio")
+      console.error("Error al actualizar el registro posoperatorio:", error);
+      alert("Error al actualizar el registro posoperatorio");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Eliminar un registro
   const handleBorrar = async (id) => {
     if (confirm("¿Estás seguro de eliminar este registro posoperatorio?")) {
-      setLoading(true)
+      setLoading(true);
       try {
-        await axios.delete(`${apiUrl}registro_posoperatorio/${id}/`)
+        await axios.delete(`${apiUrl}registro_posoperatorio/${id}/`);
 
         // Actualizar el estado local
         const pacienteActualizado = {
           ...paciente,
-          episodios: paciente.episodios.map(ep => ({
+          episodios: paciente.episodios.map((ep) => ({
             ...ep,
-            registro_operatorio: ep.registro_operatorio?.map(ro => 
-              ro.id === registroOperatorioId
-                ? {
-                    ...ro,
-                    registros_posoperatorios: ro.registros_posoperatorios?.filter(rp => rp.id !== id) || []
-                  }
-                : ro
-            ) || []
-          }))
-        }
+            registro_operatorio:
+              ep.registro_operatorio?.map((ro) =>
+                ro.id === registroOperatorioId
+                  ? {
+                      ...ro,
+                      registros_posoperatorios:
+                        ro.registros_posoperatorios?.filter(
+                          (rp) => rp.id !== id
+                        ) || [],
+                    }
+                  : ro
+              ) || [],
+          })),
+        };
 
-        dispatch(setHistoriaClinica(pacienteActualizado))
-        alert("Registro posoperatorio eliminado correctamente")
+        dispatch(setHistoriaClinica(pacienteActualizado));
+        const registrosPosop = getRegistrosPosoperatorios(
+          pacienteActualizado,
+          registroOperatorioId
+        );
+        setRegistrosPosoperatorios(registrosPosop);
+        alert("Registro posoperatorio eliminado correctamente");
+        setPaciente(pacienteActualizado);
       } catch (error) {
-        console.error("Error al eliminar el registro posoperatorio:", error)
-        alert("Error al eliminar el registro posoperatorio")
+        console.error("Error al eliminar el registro posoperatorio:", error);
+        alert("Error al eliminar el registro posoperatorio");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-  }
+  };
 
   // Columnas para la tabla de registros posoperatorios
   const columns = [
     {
       name: "Fecha",
-      selector: (row) => row.fecha ? new Date(row.fecha).toLocaleDateString() : "No especificada",
+      selector: (row) =>
+        row.fecha
+          ? new Date(row.fecha).toLocaleDateString()
+          : "No especificada",
       sortable: true,
       grow: 1,
       center: true,
@@ -165,14 +221,15 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, registrosPo
     },
     {
       name: "Recurrencia hematoma",
-      selector: (row) => row.recurrencia_hematoma ? "Sí" : "No",
+      selector: (row) => (row.recurrencia_hematoma ? "Sí" : "No"),
       sortable: true,
       grow: 1,
       center: true,
     },
     {
       name: "Gradación recurrencia",
-      selector: (row) => row.gradacion_pronostica_para_recurrencia_hsc_unilateral,
+      selector: (row) =>
+        row.gradacion_pronostica_para_recurrencia_hsc_unilateral,
       sortable: true,
       grow: 1,
       center: true,
@@ -182,17 +239,25 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, registrosPo
       cell: (row) => (
         <div className="flex justify-center space-x-2">
           <button
-          onClick={() => {
-            sessionStorage.setItem("selectedRegistroPosoperatorio", JSON.stringify(row));
-            sessionStorage.setItem("selectedRegistroOperatorio", JSON.stringify({id: registroOperatorioId}));
-            navigate(`/Revision_casos/HistoriaClinica/Episodio/RegistroOperatorio/RegistroPosoperatorio`);
-          }}
-          className="p-1.5 rounded hover:bg-blue-600 transition-colors"
-          title="Ver detalles"
-          style={{ backgroundColor: "#3b82f6", color: "white" }}
-        >
-          <Eye size={16} />
-        </button>
+            onClick={() => {
+              sessionStorage.setItem(
+                "selectedRegistroPosoperatorio",
+                JSON.stringify(row)
+              );
+              sessionStorage.setItem(
+                "selectedRegistroOperatorio",
+                JSON.stringify({ id: registroOperatorioId })
+              );
+              navigate(
+                `/Revision_casos/HistoriaClinica/Episodio/RegistroOperatorio/RegistroPosoperatorio`
+              );
+            }}
+            className="p-1.5 rounded hover:bg-blue-600 transition-colors"
+            title="Ver detalles"
+            style={{ backgroundColor: "#3b82f6", color: "white" }}
+          >
+            <Eye size={16} />
+          </button>
           <button
             onClick={() => handleEdit(row)}
             className="p-1.5 rounded hover:bg-yellow-600 transition-colors"
@@ -218,7 +283,7 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, registrosPo
       center: true,
       minWidth: "150px",
     },
-  ]
+  ];
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -227,8 +292,8 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, registrosPo
           <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
           Registros Posoperatorios
         </h2>
-        <Button 
-          onClick={() => setShowAddModal(true)} 
+        <Button
+          onClick={() => setShowAddModal(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           <Plus size={16} className="mr-2" /> Agregar Registro
@@ -245,7 +310,11 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, registrosPo
               paginationPerPage={5}
               paginationRowsPerPageOptions={[5, 10, 15]}
               highlightOnHover
-              noDataComponent={<div className="p-4 text-center text-gray-500">No hay registros posoperatorios</div>}
+              noDataComponent={
+                <div className="p-4 text-center text-gray-500">
+                  No hay registros posoperatorios
+                </div>
+              }
               responsive
             />
           </div>
@@ -255,28 +324,31 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, registrosPo
       )}
 
       {/* Modal para agregar registro */}
-      <Modal 
-        isOpen={showAddModal} 
-        onClose={() => setShowAddModal(false)} 
-        title="Agregar Registro Posoperatorio" 
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Agregar Registro Posoperatorio"
         size="lg"
       >
-        <RegistroPosoperatorioForm onSubmit={handleCreate} isLoading={loading} />
+        <RegistroPosoperatorioForm
+          onSubmit={handleCreate}
+          isLoading={loading}
+        />
       </Modal>
 
       {/* Modal para editar registro */}
-      <Modal 
-        isOpen={showEditModal} 
-        onClose={() => setShowEditModal(false)} 
-        title="Editar Registro Posoperatorio" 
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Editar Registro Posoperatorio"
         size="lg"
       >
-        <RegistroPosoperatorioForm 
-          initialData={selectedRegistro} 
-          onSubmit={handleUpdate} 
-          isLoading={loading} 
+        <RegistroPosoperatorioForm
+          initialData={selectedRegistro}
+          onSubmit={handleUpdate}
+          isLoading={loading}
         />
       </Modal>
     </div>
-  )
-}
+  );
+};

@@ -209,7 +209,7 @@ function Home() {
             <div className="w-full lg:w-1/2">
               <div className="rounded-lg overflow-hidden">
                 <img
-                  src="/placeholder.svg?height=400&width=600"
+                  src="..\assets\images\caduceo.png"
                   alt="Equipo médico"
                   className="w-full h-auto object-cover"
                 />

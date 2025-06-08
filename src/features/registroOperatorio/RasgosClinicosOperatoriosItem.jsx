@@ -1,6 +1,7 @@
 "use client"
 
 export const RasgosClinicosOperatoriosItem = ({ item }) => {
+  
   return (
     <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow">
       <div className="mb-2">

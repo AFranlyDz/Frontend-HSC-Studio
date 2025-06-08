@@ -1,59 +1,76 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useSelector, useDispatch } from "react-redux"
-import { InfoField } from "@/components/shared/InfoField"
-import { useFormatValue } from "@/hooks/useFormatValue"
-import { Edit } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import axios from "axios"
-import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { InfoField } from "@/components/shared/InfoField";
+import { useFormatValue } from "@/hooks/useFormatValue";
+import { Edit } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import axios from "axios";
+import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice";
 
 export const InformacionBasicaPanel = () => {
-  const { datos } = useSelector((state) => state.historiaClinica)
-  const { formatValue } = useFormatValue()
-  const [editing, setEditing] = useState(false)
-  const [formData, setFormData] = useState({})
-  const [loading, setLoading] = useState(false)
-  const dispatch = useDispatch()
-  const apiUrl = import.meta.env.VITE_API_BACKEND
+  const { datos } = useSelector((state) => state.historiaClinica);
+  const { formatValue } = useFormatValue();
+  const [editing, setEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: "",
+    apellidos: "",
+    edad: 0,
+    sexo: true,
+    historial_trauma_craneal: false,
+    manualidad: true,
+    antecedentes_familiares: false,
+  });
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const apiUrl = import.meta.env.VITE_API_BACKEND;
 
   // Modificar la función handleEdit para no incluir los campos no editables
   const handleEdit = () => {
+    const defaultValues = {
+      nombre: "",
+      apellidos: "",
+      edad: 0,
+      sexo: true, // Valor por defecto (ej: true = Masculino)
+      historial_trauma_craneal: false,
+      manualidad: true, // true = Derecha
+      antecedentes_familiares: false,
+    };
     // Excluir numero y seudonimo del formulario de edición
-    const { numero, seudonimo, ...editableData } = datos
-    setFormData(editableData)
-    setEditing(true)
-  }
+    const { numero, seudonimo, rcg, episodios, ...editableData } = datos;
+    setFormData({ ...defaultValues, ...editableData });
+    setEditing(true);
+  };
 
   // Cancelar edición
   const handleCancel = () => {
-    setEditing(false)
-  }
+    setEditing(false);
+  };
 
   // Manejar cambios en el formulario
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
 
-    let newValue = value
+    let newValue = value;
     if (type === "checkbox") {
-      newValue = checked
+      newValue = checked;
     } else if (type === "number") {
-      newValue = Number.parseInt(value)
+      newValue = Number.parseInt(value);
     } else if (type === "select" && (value === "true" || value === "false")) {
-      newValue = value === "true"
+      newValue = value === "true";
     }
 
     setFormData((prev) => ({
       ...prev,
       [name]: newValue,
-    }))
-  }
+    }));
+  };
 
   // Modificar el handleSubmit para actualizar el seudónimo correctamente y mostrar un mensaje con el nuevo valor, similar a RevisionCasos.jsx
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
       // Crear un objeto con solo los campos necesarios
@@ -68,15 +85,18 @@ export const InformacionBasicaPanel = () => {
         historial_trauma_craneal: formData.historial_trauma_craneal,
         manualidad: formData.manualidad,
         antecedentes_familiares: formData.antecedentes_familiares,
-      }
-      const nombrePrefix = dataToSend.nombre.substring(0, 2).toUpperCase()
-      const apellidoPrefix = dataToSend.apellidos.substring(0, 2).toUpperCase()
-      const numeroSuffix = dataToSend.numero.slice(-4)
-      dataToSend.seudonimo = `${nombrePrefix}${apellidoPrefix}${numeroSuffix}`
+      };
+      const nombrePrefix = dataToSend.nombre.substring(0, 2).toUpperCase();
+      const apellidoPrefix = dataToSend.apellidos.substring(0, 2).toUpperCase();
+      const numeroSuffix = dataToSend.numero.slice(-4);
+      dataToSend.seudonimo = `${nombrePrefix}${apellidoPrefix}${numeroSuffix}`;
 
-      const response = await axios.put(`${apiUrl}gestionar_historia_clinica/${datos.id}/`, dataToSend)
-      dispatch(setHistoriaClinica(response.data))
-      setEditing(false)
+      const response = await axios.put(
+        `${apiUrl}gestionar_historia_clinica/${datos.id}/`,
+        dataToSend
+      );
+      dispatch(setHistoriaClinica(response.data));
+      setEditing(false);
 
       // Mostrar mensaje con el seudónimo actualizado, similar a RevisionCasos.jsx
       alert(
@@ -84,15 +104,15 @@ export const InformacionBasicaPanel = () => {
         
 Seudónimo: ${response.data.seudonimo}
 
-Por favor, tome nota de este dato.`,
-      )
+Por favor, tome nota de este dato.`
+      );
     } catch (error) {
-      console.error("Error al actualizar:", error)
-      alert("Error al actualizar la información")
+      console.error("Error al actualizar:", error);
+      alert("Error al actualizar la información");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Modificar la lista de campos para no mostrar numero y seudonimo en modo edición
   // Campos a mostrar (excluyendo el id)
@@ -164,26 +184,28 @@ Por favor, tome nota de este dato.`,
           key: "antecedentes_familiares",
           type: "checkbox",
         },
-      ]
+      ];
 
   // Renderizar campo según su tipo
   const renderField = (campo) => {
+    const value = formData[campo.key] ?? ""; // Si es null/undefined, usa un valor por defecto
+
     if (campo.type === "select") {
       return (
         <select
           name={campo.key}
-          value={formData[campo.key].toString()}
+          value={String(value)} // Asegura que sea string
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
           disabled={campo.readOnly}
         >
           {campo.options.map((option) => (
-            <option key={option.value.toString()} value={option.value.toString()}>
+            <option key={String(option.value)} value={String(option.value)}>
               {option.label}
             </option>
           ))}
         </select>
-      )
+      );
     } else if (campo.type === "checkbox") {
       return (
         <div className="flex items-center">
@@ -195,9 +217,11 @@ Por favor, tome nota de este dato.`,
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             disabled={campo.readOnly}
           />
-          <span className="ml-2 text-gray-900">{formData[campo.key] ? "Sí" : "No"}</span>
+          <span className="ml-2 text-gray-900">
+            {formData[campo.key] ? "Sí" : "No"}
+          </span>
         </div>
-      )
+      );
     } else {
       return (
         <input
@@ -208,9 +232,9 @@ Por favor, tome nota de este dato.`,
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
           readOnly={campo.readOnly}
         />
-      )
+      );
     }
-  }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -234,7 +258,10 @@ Por favor, tome nota de este dato.`,
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {campos.map((campo) => (
-              <div key={campo.key} className="mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+              <div
+                key={campo.key}
+                className="mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100"
+              >
                 <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">
                   {campo.label}
                 </label>
@@ -243,7 +270,12 @@ Por favor, tome nota de este dato.`,
             ))}
           </div>
           <div className="flex justify-end space-x-2 mt-6">
-            <Button type="button" variant="outline" onClick={handleCancel} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={loading}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
@@ -254,10 +286,14 @@ Por favor, tome nota de este dato.`,
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {campos.map((campo) => (
-            <InfoField key={campo.key} label={campo.label} value={formatValue(campo.key, datos[campo.key])} />
+            <InfoField
+              key={campo.key}
+              label={campo.label}
+              value={formatValue(campo.key, datos[campo.key])}
+            />
           ))}
         </div>
       )}
     </div>
-  )
-}
+  );
+};

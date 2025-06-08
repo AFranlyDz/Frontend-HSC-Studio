@@ -47,8 +47,8 @@ function RevisionCasos() {
 
   // Manejar la visualización de detalles
   const handleVerMas = (rowData) => {
-    navigate("/Revision_casos/HistoriaClinica")
     dispatch(setHistoriaClinica(rowData))
+    navigate("/Revision_casos/HistoriaClinica")
   }
 
   // Manejar la edición

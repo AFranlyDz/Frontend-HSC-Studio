@@ -1,20 +1,26 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { EmptyState } from "@/components/shared/EmptyState"
-import { RasgosClinicosEpisodioSection } from "./RasgosClinicosEpisodioSection"
-import { EditarRasgosClinicosEpisodioForm } from "./EditarRasgosClinicosEpisodioForm"
+import { useEffect } from "react";
+import { useState } from "react";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { RasgosClinicosEpisodioSection } from "./RasgosClinicosEpisodioSection";
+import { EditarRasgosClinicosEpisodioForm } from "./EditarRasgosClinicosEpisodioForm";
 
-export const RasgosClinicosEpisodioPanel = ({ episodio }) => {
-  const [editing, setEditing] = useState(false)
+export const RasgosClinicosEpisodioPanel = ({ Episodio }) => {
+  const [episodio, setEpisodio] = useState(Episodio)
+  const [editing, setEditing] = useState(false);
+
 
   // Clasificaciones de rasgos clínicos
-  const clasificaciones = [
-    "Síntoma",
-    "Forma Clínica de Presentación"
-  ]
+  const clasificaciones = ["Síntoma", "Forma Clínica de Presentación"];
 
-  const hasRasgos = episodio.rce && episodio.rce.length > 0
+  const hasRasgos = Array.isArray(episodio?.rce) && episodio.rce.length > 0;
+  if (!episodio) return <div>Cargando episodio...</div>;
+
+  const handleCancel = (otrosDatos) => {
+    setEpisodio (otrosDatos);
+    setEditing(false);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 w-full">
@@ -36,7 +42,12 @@ export const RasgosClinicosEpisodioPanel = ({ episodio }) => {
             stroke="currentColor"
           >
             {editing ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             ) : (
               <path
                 strokeLinecap="round"
@@ -50,17 +61,28 @@ export const RasgosClinicosEpisodioPanel = ({ episodio }) => {
       </div>
 
       {editing ? (
-        <EditarRasgosClinicosEpisodioForm episodio={episodio} onCancel={() => setEditing(false)} />
+        <EditarRasgosClinicosEpisodioForm
+          episodio={episodio}
+          onCancel={handleCancel}
+        />
       ) : !hasRasgos ? (
         <EmptyState message="No existen rasgos clínicos registrados para este episodio" />
       ) : (
         <div className="space-y-8 w-full">
           {clasificaciones.map((clasificacion) => {
-            const items = episodio.rce.filter((item) => item.codificador.clasificacion === clasificacion)
-            return <RasgosClinicosEpisodioSection key={clasificacion} title={clasificacion} items={items} />
+            const items = episodio.rce.filter(
+              (item) => item.codificador.clasificacion === clasificacion
+            );
+            return (
+              <RasgosClinicosEpisodioSection
+                key={clasificacion}
+                title={clasificacion}
+                items={items}
+              />
+            );
           })}
         </div>
       )}
     </div>
-  )
-}
+  );
+};

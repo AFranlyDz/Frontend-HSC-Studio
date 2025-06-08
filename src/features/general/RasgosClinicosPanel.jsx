@@ -7,7 +7,8 @@ import { RasgosClinicosSection } from "@/components/shared/RasgosClinicosSection
 import { EditarRasgosClinicosForm } from "@/components/shared/EditarRasgosClinicosForm"
 
 export const RasgosClinicosPanel = () => {
-  const { datos } = useSelector((state) => state.historiaClinica)
+  const datosRedux = useSelector((state) => state.historiaClinica);
+  const [ datos, setDatos ] = useState(datosRedux.datos)
   const [editing, setEditing] = useState(false)
 
   // Clasificaciones de rasgos clínicos
@@ -19,7 +20,12 @@ export const RasgosClinicosPanel = () => {
     "Factor de Riesgo",
   ]
 
-  const hasRasgos = datos.rcg && datos.rcg.length > 0
+  const handleCancel = (otrosDatos) => {
+    setEditing(false);
+    setDatos(otrosDatos);
+  };
+
+  const hasRasgos = Array.isArray(datos?.rcg) && datos.rcg.length > 0;
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 w-full">
@@ -55,7 +61,7 @@ export const RasgosClinicosPanel = () => {
       </div>
 
       {editing ? (
-        <EditarRasgosClinicosForm onCancel={() => setEditing(false)} />
+        <EditarRasgosClinicosForm onCancel={handleCancel} />
       ) : !hasRasgos ? (
         <EmptyState message="No existen rasgos clínicos globales registrados" />
       ) : (
