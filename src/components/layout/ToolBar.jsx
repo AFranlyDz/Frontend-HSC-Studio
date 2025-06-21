@@ -1,11 +1,32 @@
-"use client";
+"use client"
+import { Toolbar, Box} from "@mui/material"
 
-import React from "react";
+export const ProfessionalToolbar = ({
+  children,
+}) => {
 
-export const Toolbar = ({ children, className = "" }) => {
   return (
-    <div className={`flex items-center justify-between mb-6 ${className}`}>
-      <div className="flex items-center">{children}</div>
-    </div>
-  );
-};
+      <Toolbar
+        sx={{
+          minHeight: { xs: 64, sm: 72 },
+          px: { xs: 2, sm: 3 },
+        }}
+      >
+
+        {/* Sección derecha - Botones de acción */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+          }}
+        >
+          {children}
+        </Box>
+      </Toolbar>
+  )
+}
+
+export default ProfessionalToolbar

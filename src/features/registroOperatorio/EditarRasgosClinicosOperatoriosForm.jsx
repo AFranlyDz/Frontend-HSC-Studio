@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice";
 import axios from "axios";
-import { CheckCircle, XCircle, Heart, AlertTriangle } from "lucide-react";
 import { CompactPredictionBadge } from "@/features/registroOperatorio/CompactPredictionBadge";
 
 export const EditarRasgosClinicosOperatoriosForm = ({

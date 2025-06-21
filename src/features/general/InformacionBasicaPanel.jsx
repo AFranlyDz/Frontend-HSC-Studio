@@ -13,7 +13,7 @@ import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historia
 export const InformacionBasicaPanel = () => {
   const { datos } = useSelector((state) => state.historiaClinica)
   const { formatValue } = useFormatValue()
-  const { alert, success, error } = useCustomAlert()
+  const { warning, success, error } = useCustomAlert()
   const [editing, setEditing] = useState(false)
   const [formData, setFormData] = useState({
     nombre: "",
@@ -136,7 +136,7 @@ export const InformacionBasicaPanel = () => {
 
     // Validar formulario antes del envío
     if (!validateForm()) {
-      error("Por favor, corrija los errores en el formulario antes de continuar.")
+      error("Por favor, corrija los errores en el formulario antes de continuar")
       return
     }
 
