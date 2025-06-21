@@ -5,12 +5,13 @@ import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { Plus, Edit, Trash2, Eye } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, Chip, Box } from "@mui/material"
+
+import MuiDataTable from "@/components/layout/MuiDataTable"
 import { Modal } from "@/components/ui/modal"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { EpisodioForm } from "@/components/shared/EpisodioForm"
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
-import DataTable from "@/components/layout/DatatableBase"
 
 export const EpisodiosPanel = () => {
   const { datos: paciente } = useSelector((state) => state.historiaClinica)
@@ -26,7 +27,6 @@ export const EpisodiosPanel = () => {
   const handleCreate = async (formData) => {
     setLoading(true)
     try {
-      // Agregar el ID de la historia clínica
       const dataToSend = {
         ...formData,
         historia_clinica: paciente.id,
@@ -34,7 +34,6 @@ export const EpisodiosPanel = () => {
 
       const response = await axios.post(`${apiUrl}episodios/`, dataToSend)
 
-      // Actualizar el estado local
       const episodiosActualizados = [...paciente.episodios, response.data]
       const pacienteActualizado = { ...paciente, episodios: episodiosActualizados }
       dispatch(setHistoriaClinica(pacienteActualizado))
@@ -59,7 +58,6 @@ export const EpisodiosPanel = () => {
   const handleUpdate = async (formData) => {
     setLoading(true)
     try {
-      // Asegurarse de que el ID de la historia clínica esté incluido
       const dataToSend = {
         ...formData,
         historia_clinica: paciente.id,
@@ -67,7 +65,6 @@ export const EpisodiosPanel = () => {
 
       const response = await axios.put(`${apiUrl}episodios/${formData.id}/`, dataToSend)
 
-      // Actualizar el estado local
       const episodiosActualizados = paciente.episodios.map((ep) => (ep.id === formData.id ? response.data : ep))
       const pacienteActualizado = { ...paciente, episodios: episodiosActualizados }
       dispatch(setHistoriaClinica(pacienteActualizado))
@@ -84,11 +81,8 @@ export const EpisodiosPanel = () => {
 
   // Ver detalles de un episodio
   const handleVerDetalle = (episodio) => {
-    // Guardar el episodio y el paciente en sessionStorage
     sessionStorage.setItem("selectedEpisodio", JSON.stringify(episodio))
     sessionStorage.setItem("selectedPaciente", JSON.stringify(paciente))
-
-    // Navegar a la página de detalle
     navigate("/Revision_casos/HistoriaClinica/Episodio")
   }
 
@@ -99,7 +93,6 @@ export const EpisodiosPanel = () => {
       try {
         await axios.delete(`${apiUrl}episodios/${id}/`)
 
-        // Actualizar el estado local
         const episodiosActualizados = paciente.episodios.filter((ep) => ep.id !== id)
         const pacienteActualizado = { ...paciente, episodios: episodiosActualizados }
         dispatch(setHistoriaClinica(pacienteActualizado))
@@ -120,100 +113,152 @@ export const EpisodiosPanel = () => {
       name: "Fecha de inicio",
       selector: (row) => (row.inicio ? new Date(row.inicio).toLocaleDateString() : "N/A"),
       sortable: true,
-      grow: 1,
       center: true,
     },
     {
       name: "Fecha de alta",
       selector: (row) => (row.fecha_alta ? new Date(row.fecha_alta).toLocaleDateString() : "N/A"),
       sortable: true,
-      grow: 1,
       center: true,
     },
     {
       name: "Tiempo de estadía",
       selector: (row) => `${row.tiempo_estadia || 0} días`,
       sortable: true,
-      grow: 1,
       center: true,
     },
     {
       name: "Estado al egreso",
-      selector: (row) => (row.estado_al_egreso ? "Favorable" : "Desfavorable"),
+      cell: (row) => (
+        <Chip
+          label={row.estado_al_egreso ? "Favorable" : "Desfavorable"}
+          size="small"
+          color={row.estado_al_egreso ? "success" : "error"}
+          variant="outlined"
+        />
+      ),
       sortable: true,
-      grow: 1,
       center: true,
     },
     {
       name: "Acciones",
       cell: (row) => (
-        <div className="flex justify-center space-x-2">
-          <button
-            onClick={() => handleVerDetalle(row)}
-            className="p-1.5 rounded hover:bg-blue-600 transition-colors"
+        <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleVerDetalle(row)
+            }}
+            sx={{
+              minWidth: 36,
+              width: 36,
+              height: 32,
+              backgroundColor: "#3b82f6",
+              "&:hover": { backgroundColor: "#2563eb" },
+              p: 0,
+            }}
             title="Ver detalles"
-            style={{ backgroundColor: "#3b82f6", color: "white" }}
           >
             <Eye size={16} />
-          </button>
-          <button
-            onClick={() => handleEdit(row)}
-            className="p-1.5 rounded hover:bg-yellow-600 transition-colors"
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleEdit(row)
+            }}
+            sx={{
+              minWidth: 36,
+              width: 36,
+              height: 32,
+              backgroundColor: "#eab308",
+              "&:hover": { backgroundColor: "#ca8a04" },
+              p: 0,
+            }}
             title="Editar"
-            style={{ backgroundColor: "#eab308", color: "white" }}
           >
             <Edit size={16} />
-          </button>
-          <button
-            onClick={() => handleBorrar(row.id)}
-            className="p-1.5 rounded hover:bg-red-600 transition-colors"
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleBorrar(row.id)
+            }}
+            sx={{
+              minWidth: 36,
+              width: 36,
+              height: 32,
+              backgroundColor: "#ef4444",
+              "&:hover": { backgroundColor: "#dc2626" },
+              p: 0,
+            }}
             title="Eliminar"
-            style={{ backgroundColor: "#ef4444", color: "white" }}
           >
             <Trash2 size={16} />
-          </button>
-        </div>
+          </Button>
+        </Box>
       ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-      grow: 2,
       center: true,
-      minWidth: "230px", // Aumentado para dar más espacio
-      maxWidth: "300px",
+      minWidth: "180px",
     },
   ]
 
+  if (!paciente.episodios || paciente.episodios.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-gray-800 flex items-center">
+            <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+            Episodios Clínicos
+          </h2>
+          <Button
+            variant="contained"
+            startIcon={<Plus size={16} />}
+            onClick={() => setShowAddModal(true)}
+            sx={{ textTransform: "none" }}
+          >
+            Agregar Episodio
+          </Button>
+        </div>
+        <EmptyState message="No existen episodios registrados para este paciente" />
+
+        {/* Modal para agregar episodio */}
+        <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Agregar Episodio" size="lg">
+          <EpisodioForm onSubmit={handleCreate} isLoading={loading} />
+        </Modal>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center">
-          <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-          Episodios Clínicos
-        </h2>
-        <Button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus size={16} className="mr-2" /> Agregar Episodio
-        </Button>
-      </div>
-
-      {paciente.episodios && paciente.episodios.length > 0 ? (
-        <div className="bg-white rounded-lg shadow w-full overflow-hidden">
-          <div className="px-2 py-2 w-full">
-            <DataTable
-              columns={columns}
-              data={paciente.episodios}
-              pagination
-              paginationPerPage={5}
-              paginationRowsPerPageOptions={[5, 10, 15]}
-              highlightOnHover
-              noDataComponent={<div className="p-4 text-center text-gray-500">No hay episodios registrados</div>}
-              responsive
-            />
-          </div>
-        </div>
-      ) : (
-        <EmptyState message="No existen episodios registrados para este paciente" />
-      )}
+      <MuiDataTable
+        title="Episodios Clínicos"
+        columns={columns}
+        data={paciente.episodios}
+        loading={loading}
+        pagination
+        paginationPerPage={5}
+        paginationRowsPerPageOptions={[5, 10, 15]}
+        actions={
+          <Button
+            variant="contained"
+            startIcon={<Plus size={16} />}
+            onClick={() => setShowAddModal(true)}
+            sx={{ textTransform: "none" }}
+          >
+            Agregar Episodio
+          </Button>
+        }
+        noDataComponent={
+          <div style={{ padding: "2rem", textAlign: "center", color: "#6b7280" }}>No hay episodios registrados</div>
+        }
+      />
 
       {/* Modal para agregar episodio */}
       <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Agregar Episodio" size="lg">

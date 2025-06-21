@@ -5,8 +5,9 @@ import { useEffect, useState } from "react"
 import { Plus, Edit, Trash2, Eye } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
+import { Button, Chip, Box, Typography } from "@mui/material"
 
-import DataTable from "@/components/layout/DatatableBase"
+import MuiDataTable from "@/components/layout/MuiDataTable"
 import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
 import { Modal } from "@/components/ui/modal"
@@ -22,7 +23,6 @@ function RevisionCasos() {
   // Estados para los modales
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
-  const [showDetailModal, setShowDetailModal] = useState(false)
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -83,7 +83,6 @@ function RevisionCasos() {
       setData([...data, response.data])
       setShowAddModal(false)
 
-      // Mostrar mensaje con el número y seudónimo generados
       alert(
         `Historia clínica creada exitosamente.\n\nNúmero: ${response.data.numero}\nSeudónimo: ${response.data.seudonimo}\n\nPor favor, tome nota de estos datos.`,
       )
@@ -104,7 +103,6 @@ function RevisionCasos() {
       setShowEditModal(false)
       dispatch(setHistoriaClinica(formData))
 
-      // Mostrar mensaje con el seudónimo actualizado
       alert(
         `Historia clínica actualizada exitosamente.\n\nNuevo seudónimo: ${response.data.seudonimo}\n\nPor favor, tome nota de este dato.`,
       )
@@ -116,87 +114,113 @@ function RevisionCasos() {
     }
   }
 
-  // Columnas con mejor distribución y más espacio para acciones
+  // Columnas para la tabla MUI
   const columns = [
     {
       name: "Número",
       selector: (row) => row.numero,
       sortable: true,
-      grow: 1,
       center: true,
       minWidth: "100px",
-      maxWidth: "150px",
     },
     {
       name: "Seudónimo",
       selector: (row) => row.seudonimo,
       sortable: true,
-      grow: 1.2,
       center: true,
       minWidth: "120px",
-      maxWidth: "180px",
     },
     {
       name: "Edad",
       selector: (row) => row.edad,
       sortable: true,
-      grow: 0.8,
       center: true,
       minWidth: "80px",
-      maxWidth: "100px",
     },
     {
       name: "Sexo",
-      cell: (row) => (row.sexo === true ? "Masculino" : "Femenino"),
+      cell: (row) => (
+        <Chip
+          label={row.sexo === true ? "Masculino" : "Femenino"}
+          size="small"
+          color={row.sexo === true ? "primary" : "secondary"}
+          variant="outlined"
+        />
+      ),
       sortable: true,
-      grow: 1,
       center: true,
       minWidth: "100px",
-      maxWidth: "150px",
     },
     {
       name: "Acciones",
       cell: (row) => (
-        <div className="flex justify-center space-x-2">
-          <button
-            onClick={() => handleVerMas(row)}
-            className="p-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleVerMas(row)
+            }}
+            sx={{
+              minWidth: 36,
+              width: 36,
+              height: 32,
+              backgroundColor: "#3b82f6",
+              "&:hover": { backgroundColor: "#2563eb" },
+              p: 0,
+            }}
             title="Ver detalles"
-            style={{ backgroundColor: "#3b82f6" }}
           >
             <Eye size={16} />
-          </button>
-          <button
-            onClick={() => handleEditar(row)}
-            className="p-1.5 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleEditar(row)
+            }}
+            sx={{
+              minWidth: 36,
+              width: 36,
+              height: 32,
+              backgroundColor: "#eab308",
+              "&:hover": { backgroundColor: "#ca8a04" },
+              p: 0,
+            }}
             title="Editar"
-            style={{ backgroundColor: "#eab308" }}
           >
             <Edit size={16} />
-          </button>
-          <button
-            onClick={() => handleBorrar(row.id)}
-            className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleBorrar(row.id)
+            }}
+            sx={{
+              minWidth: 36,
+              width: 36,
+              height: 32,
+              backgroundColor: "#ef4444",
+              "&:hover": { backgroundColor: "#dc2626" },
+              p: 0,
+            }}
             title="Eliminar"
-            style={{ backgroundColor: "#ef4444" }}
           >
             <Trash2 size={16} />
-          </button>
-        </div>
+          </Button>
+        </Box>
       ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-      grow: 2,
       center: true,
-      minWidth: "230px", // Aumentado de 200px
-      maxWidth: "300px", // Aumentado de 250px
+      minWidth: "180px",
     },
   ]
 
   // Componente para mostrar detalles expandidos
   const ExpandedComponent = ({ data }) => {
-    // Función para formatear los valores según su tipo
     const formatValue = (key, value) => {
       if (key === "sexo") {
         return value === true ? "Masculino" : "Femenino"
@@ -209,31 +233,36 @@ function RevisionCasos() {
       }
     }
 
-    // Lista de campos a mostrar
     const camposAMostrar = [
-      "numero",
-      "seudonimo",
-      "nombre",
-      "apellidos",
-      "edad",
-      "sexo",
-      "historial_trauma_craneal",
-      "manualidad",
-      "antecedentes_familiares",
+      { key: "numero", label: "Número" },
+      { key: "seudonimo", label: "Seudónimo" },
+      { key: "nombre", label: "Nombre" },
+      { key: "apellidos", label: "Apellidos" },
+      { key: "edad", label: "Edad" },
+      { key: "sexo", label: "Sexo" },
+      { key: "historial_trauma_craneal", label: "Historial Trauma Craneal" },
+      { key: "manualidad", label: "Manualidad" },
+      { key: "antecedentes_familiares", label: "Antecedentes Familiares" },
     ]
 
     return (
-      <div className="p-4 bg-gray-50 border-t border-b">
-        <h3 className="font-bold mb-2">Detalles del paciente:</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {camposAMostrar.map((key) => (
-            <div key={key} className="p-2 bg-white rounded shadow">
-              <strong className="text-gray-700">{key}:</strong>{" "}
-              <span className="text-gray-900">{formatValue(key, data[key])}</span>
-            </div>
+      <Box sx={{ p: 2, backgroundColor: "grey.50", borderRadius: 1, mx: 2 }}>
+        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, color: "primary.main" }}>
+          Detalles del paciente:
+        </Typography>
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 2 }}>
+          {camposAMostrar.map(({ key, label }) => (
+            <Box key={key} sx={{ p: 1.5, backgroundColor: "white", borderRadius: 1, boxShadow: 1 }}>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", display: "block" }}>
+                {label}:
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.primary", mt: 0.5 }}>
+                {formatValue(key, data[key])}
+              </Typography>
+            </Box>
           ))}
-        </div>
-      </div>
+        </Box>
+      </Box>
     )
   }
 
@@ -241,7 +270,7 @@ function RevisionCasos() {
     <div className="flex flex-col min-h-screen">
       <Header />
 
-      {/* Hero Section con fondo similar al de home.tsx */}
+      {/* Hero Section */}
       <section className="pt-24 pb-6 md:pt-32 md:pb-8 bg-gradient-to-b from-gray-100 to-white w-full">
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-6">
@@ -254,38 +283,35 @@ function RevisionCasos() {
       {/* Content Section */}
       <section className="pt-2 pb-8 bg-white w-full flex-grow">
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">Listado de Historias Clínicas</h2>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              <Plus size={18} className="mr-1" /> Agregar
-            </button>
-          </div>
-
-          {/* DataTable */}
-          <div className="bg-white rounded-lg shadow w-full overflow-hidden">
-            <div className="px-2 py-2 w-full">
-              <DataTable
-                columns={columns}
-                data={data}
-                progressPending={loading}
-                pagination
-                paginationPerPage={10}
-                paginationRowsPerPageOptions={[10, 20, 30, 50]}
-                expandableRows
-                expandableRowsComponent={ExpandedComponent}
-                expandOnRowClicked
-                expandableRowsHideExpander
-                highlightOnHover
-                noDataComponent={<div className="p-4 text-center text-gray-500">No hay registros disponibles</div>}
-                responsive
-                fixedHeader
-                fixedHeaderScrollHeight="500px"
-              />
-            </div>
-          </div>
+          {/* DataTable con título y botón integrados */}
+          <MuiDataTable
+            title="Listado de Historias Clínicas"
+            columns={columns}
+            data={data}
+            loading={loading}
+            pagination
+            paginationPerPage={10}
+            paginationRowsPerPageOptions={[10, 20, 30, 50]}
+            expandableRows
+            expandableRowsComponent={ExpandedComponent}
+            sortByIdDesc={true}
+            actions={
+              <Button
+                variant="contained"
+                startIcon={<Plus size={18} />}
+                onClick={() => setShowAddModal(true)}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                }}
+              >
+                Agregar
+              </Button>
+            }
+            noDataComponent={
+              <div style={{ padding: "2rem", textAlign: "center", color: "#6b7280" }}>No hay registros disponibles</div>
+            }
+          />
         </div>
       </section>
 
@@ -305,4 +331,3 @@ function RevisionCasos() {
 }
 
 export default RevisionCasos
-

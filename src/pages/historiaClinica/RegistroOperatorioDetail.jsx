@@ -14,7 +14,6 @@ import { RegistroOperatorioForm } from "@/features/registroOperatorio/RegistroOp
 import { CustomTabs } from "@/components/shared/CustomTabs";
 import { RasgosClinicosOperatoriosPanel } from "@/features/registroOperatorio/RasgosClinicosOperatoriosPanel";
 import { RegistrosPosoperatoriosPanel } from "@/features/registroOperatorio/RegistrosPosoperatoriosPanel";
-import DataTable from "@/components/layout/DatatableBase";
 
 function RegistroOperatorioDetail() {
   const navigate = useNavigate();
