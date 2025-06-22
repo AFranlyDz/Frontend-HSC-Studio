@@ -14,6 +14,7 @@ import { MuiTabs } from "@/components/shared/MuiTabs"
 import { RasgosClinicosOperatoriosPanel } from "@/features/registroOperatorio/RasgosClinicosOperatoriosPanel"
 import { RegistrosPosoperatoriosPanel } from "@/features/registroOperatorio/RegistrosPosoperatoriosPanel"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
+import { displayValueOrDash, formatDateOrDash, formatBooleanOrDash } from "@/libs/displayUtils"
 
 function RegistroOperatorioDetail() {
   const navigate = useNavigate()
@@ -90,26 +91,27 @@ function RegistroOperatorioDetail() {
     }
   }
 
-  // Campos a mostrar en la pestaña de información
+  // Campos a mostrar en la pestaña de información - ahora usando las funciones utilitarias
   const campos = [
     {
       label: "Fecha de operación",
       key: "fecha_operacion",
-      format: (value) => (value ? new Date(value).toLocaleDateString() : "No especificada"),
+      value: formatDateOrDash(registroOperatorio.fecha_operacion),
     },
     {
       label: "Es reintervención",
       key: "es_reintervencion",
-      format: (value) => (value ? "Sí" : "No"),
+      value: formatBooleanOrDash(registroOperatorio.es_reintervencion),
     },
     {
       label: "Escala de Glasgow",
       key: "escala_evaluacion_resultados_glasgow",
+      value: displayValueOrDash(registroOperatorio.escala_evaluacion_resultados_glasgow),
     },
     {
       label: "Estado de egreso",
       key: "estado_egreso",
-      format: (value) => (value ? "Favorable" : "Desfavorable"),
+      value: formatBooleanOrDash(registroOperatorio.estado_egreso, "Favorable", "Desfavorable"),
     },
   ]
 
@@ -134,11 +136,7 @@ function RegistroOperatorioDetail() {
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                 {campos.map((campo) => (
-                  <InfoFieldCompact
-                    key={campo.key}
-                    label={campo.label}
-                    value={campo.format ? campo.format(registroOperatorio[campo.key]) : registroOperatorio[campo.key]}
-                  />
+                  <InfoFieldCompact key={campo.key} label={campo.label} value={campo.value} />
                 ))}
               </Box>
             </CardContent>
@@ -157,7 +155,7 @@ function RegistroOperatorioDetail() {
             <CardContent sx={{ p: 0 }}>
               <InfoFieldCompact
                 label="Observaciones"
-                value={registroOperatorio.observaciones || "No hay observaciones registradas"}
+                value={displayValueOrDash(registroOperatorio.observaciones)}
                 gridColumn={2}
               />
             </CardContent>

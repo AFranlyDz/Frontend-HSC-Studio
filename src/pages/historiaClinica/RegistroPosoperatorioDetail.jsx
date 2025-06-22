@@ -12,6 +12,7 @@ import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historia
 import { RegistroPosoperatorioForm } from "@/features/registroOperatorio/RegistroPosoperatorioForm"
 import { MuiTabs } from "@/components/shared/MuiTabs"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
+import { displayValueOrDash, formatDateOrDash, formatBooleanOrDash } from "@/libs/displayUtils"
 
 function RegistroPosoperatorioDetail() {
   const navigate = useNavigate()
@@ -111,29 +112,32 @@ function RegistroPosoperatorioDetail() {
     }
   }
 
-  // Campos a mostrar en la vista de detalle
+  // Campos a mostrar en la vista de detalle - ahora usando las funciones utilitarias
   const campos = [
     {
       label: "Fecha",
       key: "fecha",
-      format: (value) => (value ? new Date(value).toLocaleDateString() : "No especificada"),
+      value: formatDateOrDash(registroPosoperatorio.fecha),
     },
     {
       label: "Tiempo transcurrido (días)",
       key: "tiempo_transcurrido",
+      value: displayValueOrDash(registroPosoperatorio.tiempo_transcurrido),
     },
     {
       label: "Escala Oslo posoperatoria",
       key: "escala_pronostica_oslo_posoperatoria",
+      value: displayValueOrDash(registroPosoperatorio.escala_pronostica_oslo_posoperatoria),
     },
     {
       label: "Recurrencia de hematoma",
       key: "recurrencia_hematoma",
-      format: (value) => (value ? "Sí" : "No"),
+      value: formatBooleanOrDash(registroPosoperatorio.recurrencia_hematoma),
     },
     {
       label: "Gradación pronóstica para recurrencia HSC unilateral",
       key: "gradacion_pronostica_para_recurrencia_hsc_unilateral",
+      value: displayValueOrDash(registroPosoperatorio.gradacion_pronostica_para_recurrencia_hsc_unilateral),
     },
   ]
 
@@ -158,13 +162,7 @@ function RegistroPosoperatorioDetail() {
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                 {campos.map((campo) => (
-                  <InfoFieldCompact
-                    key={campo.key}
-                    label={campo.label}
-                    value={
-                      campo.format ? campo.format(registroPosoperatorio[campo.key]) : registroPosoperatorio[campo.key]
-                    }
-                  />
+                  <InfoFieldCompact key={campo.key} label={campo.label} value={campo.value} />
                 ))}
               </Box>
             </CardContent>

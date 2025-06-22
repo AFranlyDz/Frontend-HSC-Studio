@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Box, Card, CardContent, CardHeader, Typography } from "@mui/material"
 import axios from "axios"
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
+import { displayValueOrDash, formatBooleanOrDash } from "@/libs/displayUtils"
 
 export const InformacionBasicaPanel = () => {
   const { datos } = useSelector((state) => state.historiaClinica)
@@ -30,36 +31,17 @@ export const InformacionBasicaPanel = () => {
   const dispatch = useDispatch()
   const apiUrl = import.meta.env.VITE_API_BACKEND
 
-  // Función para validar que no contenga números
-  const validateTextWithoutNumbers = (value, fieldName) => {
-    const hasNumbers = /\d/.test(value)
-    if (hasNumbers) {
-      return `El campo ${fieldName} no puede contener números`
-    }
-    return null
-  }
-
-  // Función para validar solo letras, espacios y algunos caracteres especiales
-  const isValidNameInput = (value) => {
-    // Permite letras, espacios, acentos, ñ, guiones y apostrofes
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-']*$/
-    return nameRegex.test(value)
-  }
-
   const handleEdit = () => {
-    const defaultValues = {
-      nombre: "",
-      apellidos: "",
-      edad: 0,
-      sexo: true,
-      historial_trauma_craneal: false,
-      manualidad: true,
-      antecedentes_familiares: false,
-    }
-    const { numero, seudonimo, rcg, episodios, ...editableData } = datos
-    setFormData({ ...defaultValues, ...editableData })
-    setErrors({})
     setEditing(true)
+    setFormData({
+      nombre: datos.nombre || "",
+      apellidos: datos.apellidos || "",
+      edad: datos.edad || 0,
+      sexo: datos.sexo || true,
+      historial_trauma_craneal: datos.historial_trauma_craneal || false,
+      manualidad: datos.manualidad || true,
+      antecedentes_familiares: datos.antecedentes_familiares || false,
+    })
   }
 
   const handleCancel = () => {
@@ -69,116 +51,50 @@ export const InformacionBasicaPanel = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-
-    // Validación especial para campos de nombre y apellidos
-    if (name === "nombre" || name === "apellidos") {
-      if (!isValidNameInput(value)) {
-        return
-      }
-    }
-
-    let newValue = value
-    if (type === "checkbox") {
-      newValue = checked
-    } else if (type === "number") {
-      newValue = Number.parseInt(value)
-    } else if (type === "select" && (value === "true" || value === "false")) {
-      newValue = value === "true"
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: newValue,
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: type === "checkbox" ? checked : value,
     }))
-
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: null,
-      }))
-    }
   }
 
-  // Validar formulario antes del envío
   const validateForm = () => {
-    const newErrors = {}
-
-    // Validar nombre
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = "El nombre es requerido"
-    } else {
-      const nombreError = validateTextWithoutNumbers(formData.nombre, "nombre")
-      if (nombreError) {
-        newErrors.nombre = nombreError
-      }
+    const errors = {}
+    if (!formData.nombre) {
+      errors.nombre = "El nombre es requerido"
     }
-
-    // Validar apellidos
-    if (!formData.apellidos.trim()) {
-      newErrors.apellidos = "Los apellidos son requeridos"
-    } else {
-      const apellidosError = validateTextWithoutNumbers(formData.apellidos, "apellidos")
-      if (apellidosError) {
-        newErrors.apellidos = apellidosError
-      }
+    if (!formData.apellidos) {
+      errors.apellidos = "Los apellidos son requeridos"
     }
-
-    // Validar edad (cambiado a 0-120)
-    if (formData.edad < 0 || formData.edad > 120) {
-      newErrors.edad = "La edad debe estar entre 0 y 120 años"
+    if (!formData.edad) {
+      errors.edad = "La edad es requerida"
+    } else if (isNaN(formData.edad) || formData.edad <= 0) {
+      errors.edad = "La edad debe ser un número positivo"
     }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+    return errors
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
-    // Validar formulario antes del envío
-    if (!validateForm()) {
-      error("Por favor, corrija los errores en el formulario antes de continuar")
+    const validationErrors = validateForm()
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
       return
     }
 
     setLoading(true)
-
     try {
-      const dataToSend = {
-        id: datos.id,
-        numero: datos.numero,
-        seudonimo: datos.seudonimo,
-        nombre: formData.nombre.trim(),
-        apellidos: formData.apellidos.trim(),
-        edad: formData.edad,
-        sexo: formData.sexo,
-        historial_trauma_craneal: formData.historial_trauma_craneal,
-        manualidad: formData.manualidad,
-        antecedentes_familiares: formData.antecedentes_familiares,
+      const response = await axios.put(`${apiUrl}/pacientes/${datos.id}`, formData)
+      if (response.status === 200) {
+        success("Información básica actualizada con éxito")
+        dispatch(setHistoriaClinica({ ...datos, ...formData }))
+        setEditing(false)
+        setErrors({})
+      } else {
+        error("Error al actualizar la información básica")
       }
-
-      const nombrePrefix = dataToSend.nombre.substring(0, 2).toUpperCase()
-      const apellidoPrefix = dataToSend.apellidos.substring(0, 2).toUpperCase()
-      const numeroSuffix = dataToSend.numero.slice(-4)
-      dataToSend.seudonimo = `${nombrePrefix}${apellidoPrefix}${numeroSuffix}`
-
-      const response = await axios.put(`${apiUrl}gestionar_historia_clinica/${datos.id}/`, dataToSend)
-      dispatch(setHistoriaClinica(response.data))
-      setEditing(false)
-      setErrors({})
-
-      // Usar el alert personalizado en lugar del alert nativo
-      success(
-        `Información actualizada correctamente.
-        
-Seudónimo: ${response.data.seudonimo}
-
-Por favor, tome nota de este dato.`,
-        "Actualización Exitosa",
-      )
-    } catch (error) {
-      console.error("Error al actualizar:", error)
-      error("Error al actualizar la información")
+    } catch (err) {
+      console.error("Error al actualizar:", err)
+      error("Error al actualizar la información básica")
     } finally {
       setLoading(false)
     }
@@ -219,110 +135,52 @@ Por favor, tome nota de este dato.`,
         },
       ]
     : [
-        { label: "Número", key: "numero", type: "text", readOnly: true },
-        { label: "Seudónimo", key: "seudonimo", type: "text", readOnly: true },
-        { label: "Nombre", key: "nombre", type: "text" },
-        { label: "Apellidos", key: "apellidos", type: "text" },
-        { label: "Edad", key: "edad", type: "number" },
+        {
+          label: "Número",
+          key: "numero",
+          value: displayValueOrDash(datos.numero),
+        },
+        {
+          label: "Seudónimo",
+          key: "seudonimo",
+          value: displayValueOrDash(datos.seudonimo),
+        },
+        {
+          label: "Nombre",
+          key: "nombre",
+          value: displayValueOrDash(datos.nombre),
+        },
+        {
+          label: "Apellidos",
+          key: "apellidos",
+          value: displayValueOrDash(datos.apellidos),
+        },
+        {
+          label: "Edad",
+          key: "edad",
+          value: displayValueOrDash(datos.edad),
+        },
         {
           label: "Sexo",
           key: "sexo",
-          type: "select",
-          options: [
-            { value: true, label: "Masculino" },
-            { value: false, label: "Femenino" },
-          ],
+          value: formatBooleanOrDash(datos.sexo, "Masculino", "Femenino"),
         },
         {
           label: "Historial de trauma craneal",
           key: "historial_trauma_craneal",
-          type: "checkbox",
+          value: formatBooleanOrDash(datos.historial_trauma_craneal),
         },
         {
           label: "Manualidad",
           key: "manualidad",
-          type: "select",
-          options: [
-            { value: true, label: "Derecha" },
-            { value: false, label: "Izquierda" },
-          ],
+          value: formatBooleanOrDash(datos.manualidad, "Derecha", "Izquierda"),
         },
         {
           label: "Antecedentes familiares",
           key: "antecedentes_familiares",
-          type: "checkbox",
+          value: formatBooleanOrDash(datos.antecedentes_familiares),
         },
       ]
-
-  const renderField = (campo) => {
-    const value = formData[campo.key] ?? ""
-    const hasError = errors[campo.key]
-
-    if (campo.type === "select") {
-      return (
-        <div>
-          <select
-            name={campo.key}
-            value={String(value)}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 ${
-              hasError ? "border-red-500" : "border-gray-300"
-            }`}
-            disabled={campo.readOnly}
-          >
-            {campo.options.map((option) => (
-              <option key={String(option.value)} value={String(option.value)}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          {hasError && <p className="mt-1 text-sm text-red-600">{hasError}</p>}
-        </div>
-      )
-    } else if (campo.type === "checkbox") {
-      return (
-        <div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              name={campo.key}
-              checked={formData[campo.key]}
-              onChange={handleChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              disabled={campo.readOnly}
-            />
-            <span className="ml-2 text-gray-900">{formData[campo.key] ? "Sí" : "No"}</span>
-          </div>
-          {hasError && <p className="mt-1 text-sm text-red-600">{hasError}</p>}
-        </div>
-      )
-    } else {
-      return (
-        <div>
-          <input
-            type={campo.type}
-            name={campo.key}
-            value={formData[campo.key]}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 ${
-              hasError ? "border-red-500" : "border-gray-300"
-            }`}
-            readOnly={campo.readOnly}
-            placeholder={
-              campo.key === "nombre"
-                ? "Solo letras y espacios"
-                : campo.key === "apellidos"
-                  ? "Solo letras y espacios"
-                  : campo.key === "edad"
-                    ? "Entre 0 y 120 años"
-                    : ""
-            }
-          />
-          {hasError && <p className="mt-1 text-sm text-red-600">{hasError}</p>}
-        </div>
-      )
-    }
-  }
 
   return (
     <Box sx={{ p: 3 }}>
@@ -347,20 +205,62 @@ Por favor, tome nota de este dato.`,
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {campos.map((campo) => (
-              <div key={campo.key} className="mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">
+              <div key={campo.key}>
+                <label htmlFor={campo.key} className="block text-sm font-medium text-gray-700">
                   {campo.label}
                 </label>
-                {renderField(campo)}
+                {campo.type === "text" || campo.type === "number" ? (
+                  <input
+                    type={campo.type}
+                    name={campo.key}
+                    id={campo.key}
+                    value={formData[campo.key]}
+                    onChange={handleChange}
+                    className="mt-1 p-2 w-full border rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-300"
+                  />
+                ) : campo.type === "select" ? (
+                  <select
+                    name={campo.key}
+                    id={campo.key}
+                    value={formData[campo.key]}
+                    onChange={handleChange}
+                    className="mt-1 p-2 w-full border rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-300"
+                  >
+                    {campo.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name={campo.key}
+                      checked={formData[campo.key]}
+                      onChange={handleChange}
+                      className="mr-2 h-5 w-5 text-blue-600 border rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-300"
+                    />
+                    {campo.label}
+                  </label>
+                )}
+                {errors[campo.key] && <p className="text-red-500 text-xs mt-1">{errors[campo.key]}</p>}
               </div>
             ))}
           </div>
-          <div className="flex justify-end space-x-2 mt-6">
-            <Button type="button" variant="outline" onClick={handleCancel} disabled={loading}>
+
+          <div className="flex justify-end space-x-2">
+            <Button
+              type="button"
+              variant="outlined"
+              onClick={handleCancel}
+              disabled={loading}
+              sx={{ textTransform: "none" }}
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Guardando..." : "Guardar Cambios"}
+            <Button type="submit" variant="contained" color="primary" disabled={loading} sx={{ textTransform: "none" }}>
+              {loading ? "Guardando..." : "Guardar"}
             </Button>
           </div>
         </form>
@@ -378,11 +278,7 @@ Por favor, tome nota de este dato.`,
           <CardContent sx={{ p: 0 }}>
             <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
               {campos.map((campo) => (
-                <InfoFieldCompact
-                  key={campo.key}
-                  label={campo.label}
-                  value={formatValue(campo.key, datos[campo.key])}
-                />
+                <InfoFieldCompact key={campo.key} label={campo.label} value={campo.value} />
               ))}
             </Box>
           </CardContent>

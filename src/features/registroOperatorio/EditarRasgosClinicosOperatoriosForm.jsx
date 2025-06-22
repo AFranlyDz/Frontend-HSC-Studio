@@ -1,59 +1,60 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice";
-import axios from "axios";
-import { CompactPredictionBadge } from "@/features/registroOperatorio/CompactPredictionBadge";
+import { useState, useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
+import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
+import axios from "axios"
+import { CompactPredictionBadge } from "@/features/registroOperatorio/CompactPredictionBadge"
+import { Box, Typography, Alert, AlertTitle, LinearProgress } from "@mui/material"
 
-export const EditarRasgosClinicosOperatoriosForm = ({
-  registroOperatorioId,
-  rasgosClinicos,
-  onCancel,
-}) => {
-  const dispatch = useDispatch();
-  const { datos: paciente } = useSelector((state) => state.historiaClinica);
-  const { datos: codificadores } = useSelector((state) => state.codificador);
-  const [loading, setLoading] = useState(false);
-  const [rasgosSeleccionados, setRasgosSeleccionados] = useState({});
+export const EditarRasgosClinicosOperatoriosForm = ({ registroOperatorioId, rasgosClinicos, onCancel }) => {
+  const dispatch = useDispatch()
+  const { datos: paciente } = useSelector((state) => state.historiaClinica)
+  const { datos: codificadores } = useSelector((state) => state.codificador)
+  const [loading, setLoading] = useState(false)
+  const [predictionsLoading, setPredictionsLoading] = useState(true)
+  const [predictionsError, setPredictionsError] = useState(null)
+  const [rasgosSeleccionados, setRasgosSeleccionados] = useState({})
   const [estadoInicial, setEstadoInicial] = useState({
     rasgos: {},
     asociaciones: {},
-  });
-  const [estadosEgreso, setEstadosEgreso] = useState([]);
-  const [recurrencias, setRecurrencias] = useState([]);
-  const apiUrl = import.meta.env.VITE_API_BACKEND;
+  })
+  const [estadosEgreso, setEstadosEgreso] = useState([])
+  const [recurrencias, setRecurrencias] = useState([])
+  const apiUrl = import.meta.env.VITE_API_BACKEND
 
   // Clasificaciones que nos interesan
-  const clasificaciones = [
-    "Tratamiento Quírurgico",
-    "Complicaciones Médicas",
-    "Complicaciones Cirugía",
-  ];
+  const clasificaciones = ["Tratamiento Quírurgico", "Complicaciones Médicas", "Complicaciones Cirugía"]
 
   // Inicializar el estado con los rasgos que ya tiene el registro operatorio
   useEffect(() => {
-    const rasgosIniciales = {};
-    const asociacionesIniciales = {};
+    const rasgosIniciales = {}
+    const asociacionesIniciales = {}
 
     if (rasgosClinicos && rasgosClinicos.length > 0) {
       rasgosClinicos.forEach((rasgo) => {
-        const codificadorId = rasgo.codificador.id;
-        rasgosIniciales[codificadorId] = true;
-        asociacionesIniciales[codificadorId] = rasgo.id; // Guardar el ID de la asociación
-      });
+        const codificadorId = rasgo.codificador.id
+        rasgosIniciales[codificadorId] = true
+        asociacionesIniciales[codificadorId] = rasgo.id
+      })
     }
 
-    setRasgosSeleccionados(rasgosIniciales);
+    setRasgosSeleccionados(rasgosIniciales)
     setEstadoInicial({
       rasgos: { ...rasgosIniciales },
       asociaciones: { ...asociacionesIniciales },
-    });
-  }, [rasgosClinicos]);
+    })
+  }, [rasgosClinicos])
 
   useEffect(() => {
     const fetchData = async () => {
+      setPredictionsLoading(true)
+      setPredictionsError(null)
+
       try {
+        // Mostrar mensaje informativo
+        console.log("Cargando predicciones para el paciente...")
+
         // Obtener estados de egreso
         const responseEgreso = await axios.post(
           `${apiUrl}probabilidad_egreso/`,
@@ -62,9 +63,10 @@ export const EditarRasgosClinicosOperatoriosForm = ({
             headers: {
               "Content-Type": "application/json",
             },
-          }
-        );
-        setEstadosEgreso(responseEgreso.data["prediction"]);
+          },
+        )
+        setEstadosEgreso(responseEgreso.data["prediction"])
+
         // Obtener recurrencias
         const responseRecurrencia = await axios.post(
           `${apiUrl}probabilidad_recurrencia/`,
@@ -73,187 +75,170 @@ export const EditarRasgosClinicosOperatoriosForm = ({
             headers: {
               "Content-Type": "application/json",
             },
-          }
-        );
-        setRecurrencias(responseRecurrencia.data["prediction"]);
+          },
+        )
+        setRecurrencias(responseRecurrencia.data["prediction"])
       } catch (error) {
-        console.error("Error al cargar datos adicionales:", error);
+        console.error("Error al cargar predicciones:", error)
+        setPredictionsError("Error al cargar las predicciones. Intente nuevamente.")
+      } finally {
+        setPredictionsLoading(false)
       }
-    };
-    fetchData();
-  }, [apiUrl, paciente.id]);
+    }
+
+    if (paciente?.id) {
+      fetchData()
+    }
+  }, [apiUrl, paciente.id])
 
   // Manejar cambio en checkbox
   const handleCheckboxChange = (codificadorId) => {
     setRasgosSeleccionados((prev) => {
-      const nuevoEstado = { ...prev };
-      nuevoEstado[codificadorId] = !prev[codificadorId];
-      return nuevoEstado;
-    });
-  };
+      const nuevoEstado = { ...prev }
+      nuevoEstado[codificadorId] = !prev[codificadorId]
+      return nuevoEstado
+    })
+  }
 
   // Guardar cambios
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
 
     try {
-      const promesas = [];
+      const promesas = []
 
       // 1. Procesar eliminaciones (DELETE)
       Object.keys(estadoInicial.rasgos).forEach((codificadorId) => {
-        if (
-          estadoInicial.rasgos[codificadorId] &&
-          !rasgosSeleccionados[codificadorId]
-        ) {
-          // Estaba marcado y ahora está desmarcado -> DELETE
-          const asociacionId = estadoInicial.asociaciones[codificadorId];
+        if (estadoInicial.rasgos[codificadorId] && !rasgosSeleccionados[codificadorId]) {
+          const asociacionId = estadoInicial.asociaciones[codificadorId]
           if (asociacionId) {
             promesas.push(
               axios
                 .delete(`${apiUrl}rasgos_clinicos_operatorios/${asociacionId}/`)
-                .then(() =>
-                  console.log(
-                    `Eliminado rasgo clínico operatorio con ID ${asociacionId}`
-                  )
-                )
+                .then(() => console.log(`Eliminado rasgo clínico operatorio con ID ${asociacionId}`))
                 .catch((error) => {
-                  console.error(
-                    `Error al eliminar rasgo clínico operatorio con ID ${asociacionId}:`,
-                    error
-                  );
-                  throw error;
-                })
-            );
+                  console.error(`Error al eliminar rasgo clínico operatorio con ID ${asociacionId}:`, error)
+                  throw error
+                }),
+            )
           }
         }
-      });
+      })
 
       // 2. Procesar adiciones (POST)
       Object.keys(rasgosSeleccionados).forEach((codificadorId) => {
-        if (
-          rasgosSeleccionados[codificadorId] &&
-          !estadoInicial.rasgos[codificadorId]
-        ) {
-          // No estaba marcado y ahora está marcado -> POST
+        if (rasgosSeleccionados[codificadorId] && !estadoInicial.rasgos[codificadorId]) {
           promesas.push(
             axios
               .post(`${apiUrl}rasgos_clinicos_operatorios/`, {
                 registro_operatorio: registroOperatorioId,
                 codificador: Number.parseInt(codificadorId),
               })
-              .then((response) =>
-                console.log(
-                  `Añadido nuevo rasgo clínico operatorio:`,
-                  response.data
-                )
-              )
+              .then((response) => console.log(`Añadido nuevo rasgo clínico operatorio:`, response.data))
               .catch((error) => {
-                console.error(
-                  `Error al añadir nuevo rasgo clínico operatorio:`,
-                  error
-                );
-                throw error;
-              })
-          );
+                console.error(`Error al añadir nuevo rasgo clínico operatorio:`, error)
+                throw error
+              }),
+          )
         }
-      });
+      })
 
       // Esperar a que todas las operaciones terminen
-      await Promise.all(promesas);
+      await Promise.all(promesas)
 
       // Obtener los datos actualizados de la historia clínica
-      const response = await axios.get(
-        `${apiUrl}gestionar_historia_clinica/${paciente.id}/`
-      );
-      console.log('registro operatorio id: ', registroOperatorioId)
+      const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      console.log("registro operatorio id: ", registroOperatorioId)
       const rasgosOperatorios = await axios.get(
-        `${apiUrl}rasgos_operatorios_lectura/?registro_operatorio__id=${registroOperatorioId}`
-      );
-      
+        `${apiUrl}rasgos_operatorios_lectura/?registro_operatorio__id=${registroOperatorioId}`,
+      )
 
       // Actualizar en Redux
-      dispatch(setHistoriaClinica(response.data));
+      dispatch(setHistoriaClinica(response.data))
 
       // Mostrar mensaje de éxito
-      alert("Rasgos clínicos operatorios actualizados correctamente");
+      alert("Rasgos clínicos operatorios actualizados correctamente")
 
       // Cancelar modo edición
-      onCancel(rasgosOperatorios.data);
+      onCancel(rasgosOperatorios.data)
     } catch (error) {
-      console.error(
-        "Error al actualizar los rasgos clínicos operatorios:",
-        error
-      );
-      alert(
-        "Error al actualizar los rasgos clínicos operatorios. Por favor, intente nuevamente."
-      );
+      console.error("Error al actualizar los rasgos clínicos operatorios:", error)
+      alert("Error al actualizar los rasgos clínicos operatorios. Por favor, intente nuevamente.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Agrupar codificadores por clasificación
-  const codificadoresPorClasificacion = {};
+  const codificadoresPorClasificacion = {}
   clasificaciones.forEach((clasificacion) => {
-    codificadoresPorClasificacion[clasificacion] = codificadores.filter(
-      (c) => c.clasificacion === clasificacion
-    );
-  });
+    codificadoresPorClasificacion[clasificacion] = codificadores.filter((c) => c.clasificacion === clasificacion)
+  })
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">
-          Editar Rasgos Clínicos Operatorios
-        </h3>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Guardando...
-            </>
-          ) : (
-            "Guardar Cambios"
-          )}
-        </button>
-      </div>
+    <Box>
+      {/* Indicador de carga de predicciones */}
+      {predictionsLoading && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <AlertTitle>Cargando Predicciones</AlertTitle>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Estamos procesando las predicciones de recurrencia y estado de egreso para este paciente...
+          </Typography>
+          <LinearProgress />
+        </Alert>
+      )}
 
-      <div className="space-y-8">
-        {clasificaciones.map((clasificacion) => (
-          <div key={clasificacion} className="border-b pb-6 last:border-b-0">
-            <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
-              <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-              {clasificacion}
-            </h4>
+      {/* Error en predicciones */}
+      {predictionsError && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          <AlertTitle>Error en Predicciones</AlertTitle>
+          <Typography variant="body2">{predictionsError}</Typography>
+        </Alert>
+      )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {codificadoresPorClasificacion[clasificacion]?.length > 0 ? (
-                codificadoresPorClasificacion[clasificacion].map(
-                  (codificador, index) => (
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">Editar Rasgos Clínicos Operatorios</h3>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Guardando...
+              </>
+            ) : (
+              "Guardar Cambios"
+            )}
+          </button>
+        </div>
+
+        <div className="space-y-8">
+          {clasificaciones.map((clasificacion) => (
+            <div key={clasificacion} className="border-b pb-6 last:border-b-0">
+              <h4 className="text-md font-semibold text-gray-700 mb-4 flex items-center">
+                <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                {clasificacion}
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {codificadoresPorClasificacion[clasificacion]?.length > 0 ? (
+                  codificadoresPorClasificacion[clasificacion].map((codificador, index) => (
                     <div
                       key={codificador.id}
                       className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
@@ -267,10 +252,7 @@ export const EditarRasgosClinicosOperatoriosForm = ({
                           className="mt-0.5 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                         />
                         <div className="flex-1 min-w-0">
-                          <label
-                            htmlFor={`codificador-${codificador.id}`}
-                            className="cursor-pointer block"
-                          >
+                          <label htmlFor={`codificador-${codificador.id}`} className="cursor-pointer block">
                             <div className="font-medium text-gray-900 text-sm mb-1 leading-tight">
                               {codificador.nombre}
                             </div>
@@ -281,37 +263,35 @@ export const EditarRasgosClinicosOperatoriosForm = ({
 
                           {clasificacion === "Tratamiento Quírurgico" && (
                             <div className="border-t border-gray-100 pt-2 space-y-1">
-                              {recurrencias[index] && (
-                                <CompactPredictionBadge
-                                  label="Recurrencia"
-                                  value={recurrencias[index][0]}
-                                  type="recurrence"
-                                />
-                              )}
+                              <CompactPredictionBadge
+                                label="Recurrencia"
+                                value={recurrencias[index] ? recurrencias[index][0] : null}
+                                type="recurrence"
+                                loading={predictionsLoading}
+                              />
 
-                              {estadosEgreso[index] && (
-                                <CompactPredictionBadge
-                                  label="Estado egreso"
-                                  value={estadosEgreso[index][0]}
-                                  type="discharge"
-                                />
-                              )}
+                              <CompactPredictionBadge
+                                label="Estado egreso"
+                                value={estadosEgreso[index] ? estadosEgreso[index][0] : null}
+                                type="discharge"
+                                loading={predictionsLoading}
+                              />
                             </div>
                           )}
                         </div>
                       </div>
                     </div>
-                  )
-                )
-              ) : (
-                <div className="col-span-2 text-center py-4 text-gray-500">
-                  No hay codificadores registrados para esta clasificación
-                </div>
-              )}
+                  ))
+                ) : (
+                  <div className="col-span-2 text-center py-4 text-gray-500">
+                    No hay codificadores registrados para esta clasificación
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </form>
-  );
-};
+          ))}
+        </div>
+      </form>
+    </Box>
+  )
+}
