@@ -1,123 +1,115 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { HistoriaClinicaLayout } from "@/components/layout/HistoriaClinicaLayout";
-import { InfoField } from "@/components/shared/InfoField";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit } from "lucide-react";
-import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice";
-import { RegistroPosoperatorioForm } from "@/features/registroOperatorio/RegistroPosoperatorioForm";
-import { CustomTabs } from "@/components/shared/CustomTabs";
+import { useState, useEffect } from "react"
+import { useNavigate, useLocation } from "react-router-dom"
+import { HistoriaClinicaLayout } from "@/components/layout/HistoriaClinicaLayout"
+import { InfoField } from "@/components/shared/InfoField"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button, Paper, Box } from "@mui/material"
+import { ArrowLeft, Edit } from "lucide-react"
+import axios from "axios"
+import { useDispatch, useSelector } from "react-redux"
+import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
+import { RegistroPosoperatorioForm } from "@/features/registroOperatorio/RegistroPosoperatorioForm"
+import { MuiTabs } from "@/components/shared/MuiTabs"
 
 function RegistroPosoperatorioDetail() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const dispatch = useDispatch();
-  const { datos: paciente } = useSelector((state) => state.historiaClinica);
-  const [registroPosoperatorio, setRegistroPosoperatorio] = useState(null);
-  const [registroOperatorio, setRegistroOperatorio] = useState(null);
-  const [episodio, setEpisodio] = useState(null);
-  const [editing, setEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
-  const apiUrl = import.meta.env.VITE_API_BACKEND;
+  const navigate = useNavigate()
+  const location = useLocation()
+  const dispatch = useDispatch()
+  const { datos: paciente } = useSelector((state) => state.historiaClinica)
+  const [registroPosoperatorio, setRegistroPosoperatorio] = useState(null)
+  const [registroOperatorio, setRegistroOperatorio] = useState(null)
+  const [episodio, setEpisodio] = useState(null)
+  const [editing, setEditing] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState(0)
+  const apiUrl = import.meta.env.VITE_API_BACKEND
 
   // Recuperar datos del registro posoperatorio, operatorio y episodio desde sessionStorage
   useEffect(() => {
-    const storedRegistroPosop = sessionStorage.getItem("selectedRegistroPosoperatorio");
-    const storedRegistroOp = sessionStorage.getItem("selectedRegistroOperatorio");
-    const storedEpisodio = sessionStorage.getItem("selectedEpisodio");
+    const storedRegistroPosop = sessionStorage.getItem("selectedRegistroPosoperatorio")
+    const storedRegistroOp = sessionStorage.getItem("selectedRegistroOperatorio")
+    const storedEpisodio = sessionStorage.getItem("selectedEpisodio")
 
     if (storedRegistroPosop && storedRegistroOp && storedEpisodio) {
-      setRegistroPosoperatorio(JSON.parse(storedRegistroPosop));
-      setRegistroOperatorio(JSON.parse(storedRegistroOp));
-      setEpisodio(JSON.parse(storedEpisodio));
+      setRegistroPosoperatorio(JSON.parse(storedRegistroPosop))
+      setRegistroOperatorio(JSON.parse(storedRegistroOp))
+      setEpisodio(JSON.parse(storedEpisodio))
     }
-  }, [location.search]);
+  }, [location.search])
 
   // Si no hay datos, mostrar mensaje
   if (!registroPosoperatorio || !registroOperatorio || !episodio || !paciente) {
     return (
       <HistoriaClinicaLayout title="Detalle del Registro Posoperatorio">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8 text-center">
+        <Paper elevation={1} sx={{ p: 4, textAlign: "center", borderRadius: 2 }}>
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             No se encontraron datos del registro posoperatorio
           </h2>
-          <Button
-            onClick={() => navigate(-1)}
-            className="mt-4"
-          >
-            <ArrowLeft size={16} className="mr-2" /> Volver
+          <Button onClick={() => navigate(-1)} variant="contained" startIcon={<ArrowLeft size={16} />} sx={{ mt: 2 }}>
+            Volver
           </Button>
-        </div>
+        </Paper>
       </HistoriaClinicaLayout>
-    );
+    )
   }
 
   // Iniciar edición
   const handleEdit = () => {
-    setEditing(true);
-  };
+    setEditing(true)
+  }
 
   // Cancelar edición
   const handleCancel = () => {
-    setEditing(false);
-  };
+    setEditing(false)
+  }
 
   // Guardar cambios
   const handleSubmit = async (formData) => {
-    setLoading(true);
+    setLoading(true)
 
     try {
       const dataToSend = {
         ...formData,
         registro_operatorio: registroOperatorio.id,
-      };
+      }
 
-      const response = await axios.put(
-        `${apiUrl}registro_posoperatorio/${registroPosoperatorio.id}/`,
-        dataToSend
-      );
+      const response = await axios.put(`${apiUrl}registro_posoperatorio/${registroPosoperatorio.id}/`, dataToSend)
 
-      // Actualizar el estado local
-      setRegistroPosoperatorio(response.data);
+      setRegistroPosoperatorio(response.data)
+      sessionStorage.setItem("selectedRegistroPosoperatorio", JSON.stringify(response.data))
 
-      // Actualizar sessionStorage
-      sessionStorage.setItem("selectedRegistroPosoperatorio", JSON.stringify(response.data));
-
-      // Actualizar el estado en Redux
       const pacienteActualizado = {
         ...paciente,
-        episodios: paciente.episodios.map(ep => ({
+        episodios: paciente.episodios.map((ep) => ({
           ...ep,
-          registro_operatorio: ep.registro_operatorio?.map(ro => 
-            ro.id === registroOperatorio.id
-              ? {
-                  ...ro,
-                  registros_posoperatorios: ro.registros_posoperatorios?.map(rp => 
-                    rp.id === registroPosoperatorio.id ? response.data : rp
-                  ) || []
-                }
-              : ro
-          ) || []
-        }))
-      };
+          registro_operatorio:
+            ep.registro_operatorio?.map((ro) =>
+              ro.id === registroOperatorio.id
+                ? {
+                    ...ro,
+                    registros_posoperatorios:
+                      ro.registros_posoperatorios?.map((rp) =>
+                        rp.id === registroPosoperatorio.id ? response.data : rp,
+                      ) || [],
+                  }
+                : ro,
+            ) || [],
+        })),
+      }
 
-      dispatch(setHistoriaClinica(pacienteActualizado));
+      dispatch(setHistoriaClinica(pacienteActualizado))
 
-      setEditing(false);
-      alert("Registro posoperatorio actualizado correctamente");
+      setEditing(false)
+      alert("Registro posoperatorio actualizado correctamente")
     } catch (error) {
-      console.error("Error al actualizar:", error);
-      alert("Error al actualizar el registro posoperatorio");
+      console.error("Error al actualizar:", error)
+      alert("Error al actualizar el registro posoperatorio")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Campos a mostrar en la vista de detalle
   const campos = [
@@ -143,7 +135,7 @@ function RegistroPosoperatorioDetail() {
       label: "Gradación pronóstica para recurrencia HSC unilateral",
       key: "gradacion_pronostica_para_recurrencia_hsc_unilateral",
     },
-  ];
+  ]
 
   // Configuración de las pestañas
   const tabs = [
@@ -151,7 +143,6 @@ function RegistroPosoperatorioDetail() {
       label: "Información General",
       content: (
         <div className="space-y-6">
-          {/* Información básica del registro posoperatorio */}
           <Card>
             <CardHeader>
               <CardTitle>Información del Registro Posoperatorio</CardTitle>
@@ -163,9 +154,7 @@ function RegistroPosoperatorioDetail() {
                     key={campo.key}
                     label={campo.label}
                     value={
-                      campo.format
-                        ? campo.format(registroPosoperatorio[campo.key])
-                        : registroPosoperatorio[campo.key]
+                      campo.format ? campo.format(registroPosoperatorio[campo.key]) : registroPosoperatorio[campo.key]
                     }
                   />
                 ))}
@@ -175,27 +164,28 @@ function RegistroPosoperatorioDetail() {
         </div>
       ),
     },
-    // Puedes agregar más pestañas aquí si es necesario
-  ];
+  ]
 
   return (
     <HistoriaClinicaLayout title="Detalle del Registro Posoperatorio">
-      <div className="flex justify-between items-center mb-4">
-        <Button onClick={() => navigate(-1)} variant="outline">
-          <ArrowLeft size={16} className="mr-2" /> Volver
+      <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Button onClick={() => navigate(-1)} variant="outlined" startIcon={<ArrowLeft size={16} />}>
+          Volver
         </Button>
         {!editing && activeTab === 0 && (
           <Button
             onClick={handleEdit}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            variant="contained"
+            startIcon={<Edit size={16} />}
+            sx={{ bgcolor: "primary.main", "&:hover": { bgcolor: "primary.dark" } }}
           >
-            <Edit size={16} className="mr-2" /> Editar
+            Editar
           </Button>
         )}
-      </div>
+      </Box>
 
       {editing ? (
-        <Card>
+        <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
           <CardHeader>
             <CardTitle>Editar Registro Posoperatorio</CardTitle>
           </CardHeader>
@@ -207,18 +197,14 @@ function RegistroPosoperatorioDetail() {
               onCancel={handleCancel}
             />
           </CardContent>
-        </Card>
+        </Paper>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-1">
-          <CustomTabs
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={(index) => setActiveTab(index)}
-          />
-        </div>
+        <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
+          <MuiTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        </Paper>
       )}
     </HistoriaClinicaLayout>
-  );
+  )
 }
 
-export default RegistroPosoperatorioDetail;
+export default RegistroPosoperatorioDetail

@@ -11,7 +11,7 @@ import MuiDataTable from "@/components/layout/MuiDataTable"
 import { Modal } from "@/components/ui/modal"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { RegistroOperatorioForm } from "@/features/registroOperatorio/RegistroOperatorioForm"
-import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
+import { setHistoriaClinica, forceUpdate } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
 
 export const RegistroOperatorioPanel = ({ episodioId }) => {
   const { datos: paciente } = useSelector((state) => state.historiaClinica)
@@ -36,24 +36,10 @@ export const RegistroOperatorioPanel = ({ episodioId }) => {
         episodio: episodioId,
       }
 
-      const response = await axios.post(`${apiUrl}registro_operatorio/`, dataToSend)
+      await axios.post(`${apiUrl}registro_operatorio/`, dataToSend)
 
-      // Actualizar el estado local
-      const episodiosActualizados = paciente.episodios.map((ep) =>
-        ep.id === episodioId
-          ? {
-              ...ep,
-              registro_operatorio: [...(ep.registro_operatorio || []), response.data],
-            }
-          : ep,
-      )
-
-      dispatch(
-        setHistoriaClinica({
-          ...paciente,
-          episodios: episodiosActualizados,
-        }),
-      )
+      const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      dispatch(setHistoriaClinica(response.data))
 
       setShowAddModal(false)
       alert("Registro operatorio creado correctamente")
@@ -80,25 +66,10 @@ export const RegistroOperatorioPanel = ({ episodioId }) => {
         episodio: episodioId,
       }
 
-      const response = await axios.put(`${apiUrl}registro_operatorio/${formData.id}/`, dataToSend)
+      await axios.put(`${apiUrl}registro_operatorio/${formData.id}/`, dataToSend)
 
-      // Actualizar el estado local
-      const episodiosActualizados = paciente.episodios.map((ep) =>
-        ep.id === episodioId
-          ? {
-              ...ep,
-              registro_operatorio:
-                ep.registro_operatorio?.map((ro) => (ro.id === formData.id ? response.data : ro)) || [],
-            }
-          : ep,
-      )
-
-      dispatch(
-        setHistoriaClinica({
-          ...paciente,
-          episodios: episodiosActualizados,
-        }),
-      )
+      const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      dispatch(setHistoriaClinica(response.data))
 
       setShowEditModal(false)
       alert("Registro operatorio actualizado correctamente")
@@ -117,22 +88,8 @@ export const RegistroOperatorioPanel = ({ episodioId }) => {
       try {
         await axios.delete(`${apiUrl}registro_operatorio/${id}/`)
 
-        // Actualizar el estado local
-        const episodiosActualizados = paciente.episodios.map((ep) =>
-          ep.id === episodioId
-            ? {
-                ...ep,
-                registro_operatorio: ep.registro_operatorio?.filter((ro) => ro.id !== id) || [],
-              }
-            : ep,
-        )
-
-        dispatch(
-          setHistoriaClinica({
-            ...paciente,
-            episodios: episodiosActualizados,
-          }),
-        )
+        const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+        dispatch(setHistoriaClinica(response.data))
 
         alert("Registro operatorio eliminado correctamente")
       } catch (error) {
@@ -148,7 +105,11 @@ export const RegistroOperatorioPanel = ({ episodioId }) => {
   const columns = [
     {
       name: "Fecha operación",
-      selector: (row) => (row.fecha_operacion ? new Date(row.fecha_operacion).toLocaleDateString() : "No especificada"),
+      selector: (row) => {
+        if (!row.fecha_operacion) return "N/A";
+        const [year, month, day] = row.fecha_operacion.split('T')[0].split('-');
+        return `${day}/${month}/${year}`;
+      },
       sortable: true,
       center: true,
     },

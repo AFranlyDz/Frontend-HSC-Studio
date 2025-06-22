@@ -16,11 +16,14 @@ export const historiaClinicaSlice = createSlice({
     resetHistoriaClinica: (state) => {
       state.datos = null;
     },
+    forceUpdate: (state) => {
+      state.datos = {...state.datos}; // Crear nueva referencia
+    }
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setHistoriaClinica, resetHistoriaClinica } =
+export const { setHistoriaClinica, resetHistoriaClinica, forceUpdate } =
   historiaClinicaSlice.actions;
 
 export default historiaClinicaSlice.reducer;

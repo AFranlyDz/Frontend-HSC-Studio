@@ -22,6 +22,7 @@ export const RasgosClinicosPanel = () => {
 
   const handleCancel = (otrosDatos) => {
     setEditing(false);
+    console.log("me ejecuto");
     setDatos(otrosDatos);
   };
 

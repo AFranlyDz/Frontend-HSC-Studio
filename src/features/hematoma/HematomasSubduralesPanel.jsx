@@ -36,24 +36,10 @@ export const HematomasSubduralesPanel = ({ episodioId }) => {
         episodio: episodioId,
       }
 
-      const response = await axios.post(`${apiUrl}hematomas_subdurales/`, dataToSend)
+      await axios.post(`${apiUrl}hematomas_subdurales/`, dataToSend)
 
-      // Actualizar el estado local
-      const episodiosActualizados = paciente.episodios.map((ep) =>
-        ep.id === episodioId
-          ? {
-              ...ep,
-              hematomas_subdurales: [...(ep.hematomas_subdurales || []), response.data],
-            }
-          : ep,
-      )
-
-      dispatch(
-        setHistoriaClinica({
-          ...paciente,
-          episodios: episodiosActualizados,
-        }),
-      )
+      const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      dispatch(setHistoriaClinica(response.data))
 
       setShowAddModal(false)
       alert("Hematoma subdural creado correctamente")
@@ -80,25 +66,10 @@ export const HematomasSubduralesPanel = ({ episodioId }) => {
         episodio: episodioId,
       }
 
-      const response = await axios.put(`${apiUrl}hematomas_subdurales/${formData.id}/`, dataToSend)
+      await axios.put(`${apiUrl}hematomas_subdurales/${formData.id}/`, dataToSend)
 
-      // Actualizar el estado local
-      const episodiosActualizados = paciente.episodios.map((ep) =>
-        ep.id === episodioId
-          ? {
-              ...ep,
-              hematomas_subdurales:
-                ep.hematomas_subdurales?.map((hs) => (hs.id === formData.id ? response.data : hs)) || [],
-            }
-          : ep,
-      )
-
-      dispatch(
-        setHistoriaClinica({
-          ...paciente,
-          episodios: episodiosActualizados,
-        }),
-      )
+      const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      dispatch(setHistoriaClinica(response.data))
 
       setShowEditModal(false)
       alert("Hematoma subdural actualizado correctamente")
@@ -117,22 +88,8 @@ export const HematomasSubduralesPanel = ({ episodioId }) => {
       try {
         await axios.delete(`${apiUrl}hematomas_subdurales/${id}/`)
 
-        // Actualizar el estado local
-        const episodiosActualizados = paciente.episodios.map((ep) =>
-          ep.id === episodioId
-            ? {
-                ...ep,
-                hematomas_subdurales: ep.hematomas_subdurales?.filter((hs) => hs.id !== id) || [],
-              }
-            : ep,
-        )
-
-        dispatch(
-          setHistoriaClinica({
-            ...paciente,
-            episodios: episodiosActualizados,
-          }),
-        )
+        const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+        dispatch(setHistoriaClinica(response.data))
 
         alert("Hematoma subdural eliminado correctamente")
       } catch (error) {

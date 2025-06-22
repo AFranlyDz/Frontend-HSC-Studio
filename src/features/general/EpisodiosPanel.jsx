@@ -31,12 +31,11 @@ export const EpisodiosPanel = () => {
         ...formData,
         historia_clinica: paciente.id,
       }
-
-      const response = await axios.post(`${apiUrl}episodios/`, dataToSend)
-
-      const episodiosActualizados = [...paciente.episodios, response.data]
-      const pacienteActualizado = { ...paciente, episodios: episodiosActualizados }
-      dispatch(setHistoriaClinica(pacienteActualizado))
+      
+      await axios.post(`${apiUrl}episodios/`, dataToSend)
+      
+      const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      dispatch(setHistoriaClinica(response.data))
 
       setShowAddModal(false)
       alert("Episodio creado correctamente")
@@ -63,11 +62,10 @@ export const EpisodiosPanel = () => {
         historia_clinica: paciente.id,
       }
 
-      const response = await axios.put(`${apiUrl}episodios/${formData.id}/`, dataToSend)
+      await axios.put(`${apiUrl}episodios/${formData.id}/`, dataToSend)
 
-      const episodiosActualizados = paciente.episodios.map((ep) => (ep.id === formData.id ? response.data : ep))
-      const pacienteActualizado = { ...paciente, episodios: episodiosActualizados }
-      dispatch(setHistoriaClinica(pacienteActualizado))
+      const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      dispatch(setHistoriaClinica(response.data))
 
       setShowEditModal(false)
       alert("Episodio actualizado correctamente")
@@ -92,11 +90,9 @@ export const EpisodiosPanel = () => {
       setLoading(true)
       try {
         await axios.delete(`${apiUrl}episodios/${id}/`)
-
-        const episodiosActualizados = paciente.episodios.filter((ep) => ep.id !== id)
-        const pacienteActualizado = { ...paciente, episodios: episodiosActualizados }
-        dispatch(setHistoriaClinica(pacienteActualizado))
-
+        const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+        dispatch(setHistoriaClinica(response.data))
+        
         alert("Episodio eliminado correctamente")
       } catch (error) {
         console.error("Error al eliminar el episodio:", error)
@@ -111,13 +107,19 @@ export const EpisodiosPanel = () => {
   const columns = [
     {
       name: "Fecha de inicio",
-      selector: (row) => (row.inicio ? new Date(row.inicio).toLocaleDateString() : "N/A"),
+      selector: (row) => {
+        if (!row.inicio) return "N/A";
+        const [year, month, day] = row.inicio.split('T')[0].split('-');
+        return `${day}/${month}/${year}`;
+      },
       sortable: true,
       center: true,
     },
     {
       name: "Fecha de alta",
-      selector: (row) => (row.fecha_alta ? new Date(row.fecha_alta).toLocaleDateString() : "N/A"),
+      selector: (row) => {if (!row.fecha_alta) return "N/A";
+        const [year, month, day] = row.fecha_alta.split('T')[0].split('-');
+        return `${day}/${month}/${year}`;},
       sortable: true,
       center: true,
     },

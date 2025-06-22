@@ -8,13 +8,41 @@ export function EpisodioForm({ initialData, onSubmit, isLoading, onCancel }) {
   const [formData, setFormData] = useState({
     inicio: "",
     fecha_alta: "",
-    tiempo_estadia: 0,
     estado_al_egreso: true,
     tiempo_antecedente: 0,
     descripcion_antecedente: "",
     edad_paciente: 0,
     observaciones: "",
   })
+  
+  // Estado para errores de validación
+  const [errors, setErrors] = useState({
+    fecha_alta: ""
+  })
+
+  // Calcular días de diferencia entre dos fechas
+  const calcularDiasDiferencia = (fechaInicio, fechaFin) => {
+    if (!fechaInicio || !fechaFin) return 0
+    
+    const inicio = new Date(fechaInicio)
+    const fin = new Date(fechaFin)
+    
+    // Diferencia en milisegundos
+    const diferencia = fin.getTime() - inicio.getTime()
+    
+    // Convertir a días (1000 ms * 60 s * 60 min * 24 h)
+    return Math.round(diferencia / (1000 * 60 * 60 * 24))
+  }
+
+  // Validar que la fecha de alta sea posterior a la de inicio
+  const validarFechas = (inicio, alta) => {
+    if (!inicio || !alta) return true // Permitir si alguna está vacía
+    
+    const fechaInicio = new Date(inicio)
+    const fechaAlta = new Date(alta)
+    
+    return fechaAlta > fechaInicio
+  }
 
   // Actualizar el formulario si cambian los datos iniciales
   useEffect(() => {
@@ -39,16 +67,59 @@ export function EpisodioForm({ initialData, onSubmit, isLoading, onCancel }) {
       newValue = value
     }
 
-    setFormData({
+    const updatedFormData = {
       ...formData,
       [name]: newValue,
-    })
+    }
+
+    // Si cambian las fechas, recalcular el tiempo de estadía y validar
+    if (name === "inicio" || name === "fecha_alta") {
+      // Validar fechas
+      const fechaInicio = name === "inicio" ? newValue : formData.inicio
+      const fechaAlta = name === "fecha_alta" ? newValue : formData.fecha_alta
+      
+      if (fechaInicio && fechaAlta) {
+        const esValida = validarFechas(fechaInicio, fechaAlta)
+        setErrors({
+          ...errors,
+          fecha_alta: esValida ? "" : "La fecha de alta debe ser posterior a la fecha de inicio"
+        })
+      } else {
+        setErrors({
+          ...errors,
+          fecha_alta: ""
+        })
+      }
+
+      // Calcular tiempo de estadía
+      updatedFormData.tiempo_estadia = calcularDiasDiferencia(
+        fechaInicio,
+        fechaAlta
+      )
+    }
+
+    setFormData(updatedFormData)
   }
 
   // Enviar el formulario
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSubmit(formData)
+    
+    // Validar fechas antes de enviar
+    if (formData.inicio && formData.fecha_alta && !validarFechas(formData.inicio, formData.fecha_alta)) {
+      setErrors({
+        ...errors,
+        fecha_alta: "La fecha de alta debe ser posterior a la fecha de inicio"
+      })
+      return
+    }
+
+    // Asegurarnos de que el tiempo de estadía esté calculado antes de enviar
+    const datosEnviar = {
+      ...formData,
+      tiempo_estadia: calcularDiasDiferencia(formData.inicio, formData.fecha_alta)
+    }
+    onSubmit(datosEnviar)
   }
 
   return (
@@ -63,6 +134,7 @@ export function EpisodioForm({ initialData, onSubmit, isLoading, onCancel }) {
             value={formData.inicio || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
         </div>
 
@@ -74,25 +146,31 @@ export function EpisodioForm({ initialData, onSubmit, isLoading, onCancel }) {
             name="fecha_alta"
             value={formData.fecha_alta || ""}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border rounded-md text-gray-900 focus:outline-none focus:ring-2 ${
+              errors.fecha_alta 
+                ? "border-red-500 focus:ring-red-500" 
+                : "border-gray-300 focus:ring-blue-500"
+            }`}
+            required
           />
+          {errors.fecha_alta && (
+            <p className="mt-1 text-sm text-red-600">{errors.fecha_alta}</p>
+          )}
         </div>
 
-        {/* Tiempo de estadía */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo de estadía (días)</label>
+        {/* Mostrar tiempo de estadía calculado (solo lectura) */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tiempo de estadía calculado</label>
           <input
-            type="number"
-            name="tiempo_estadia"
-            value={formData.tiempo_estadia || 0}
-            onChange={handleChange}
-            min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="text"
+            value={`${formData.tiempo_estadia || 0} días`}
+            readOnly
+            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 cursor-not-allowed"
           />
         </div>
 
-        {/* Estado al egreso */}
-        <div>
+       {/* Estado al egreso */}
+       <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Estado al egreso</label>
           <select
             name="estado_al_egreso"
@@ -158,10 +236,19 @@ export function EpisodioForm({ initialData, onSubmit, isLoading, onCancel }) {
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel} 
+          disabled={isLoading} 
+          className="text-white"
+        >
           Cancelar
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          disabled={isLoading || (formData.inicio && formData.fecha_alta && !validarFechas(formData.inicio, formData.fecha_alta))}
+        >
           {isLoading ? "Guardando..." : initialData?.id ? "Actualizar" : "Guardar"}
         </Button>
       </div>

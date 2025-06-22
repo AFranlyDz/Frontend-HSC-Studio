@@ -15,8 +15,6 @@ import {
   Box,
   Chip,
   Paper,
-  Button,
-  useTheme,
 } from "@mui/material"
 import {
   ExpandLess,
@@ -29,10 +27,8 @@ import {
   MedicalServices,
   PostAdd,
   Bloodtype,
-  Description,
 } from "@mui/icons-material"
-import { PDFDownloadLink } from "@react-pdf/renderer"
-import PlanillaRecoleccion from "@/features/exportaciones/PlanillaRecoleccion"
+import { PdfExportButton } from "@/features/exportaciones/PdfExportButton"
 
 const DRAWER_WIDTH = 350
 const SIDEBAR_STATE_KEY = "hierarchicalSidebarState"
@@ -42,7 +38,6 @@ export const HierarchicalMedicalSidebar = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState("")
-  const theme = useTheme()
 
   // Función para cargar el estado desde localStorage
   const loadSidebarState = () => {
@@ -214,41 +209,7 @@ export const HierarchicalMedicalSidebar = () => {
           </Box>
           {/* Botón PDF en el paper del paciente */}
           <Box sx={{ mt: 2 }}>
-            <PDFDownloadLink
-              document={<PlanillaRecoleccion paciente={paciente} />}
-              fileName={`Planilla_Recoleccion_${paciente.seudonimo || paciente.numero}.pdf`}
-            >
-              {({ loading }) => (
-                <Button
-                  variant="contained"
-                  size="small"
-                  fullWidth
-                  startIcon={loading ? null : <Description />}
-                  disabled={loading}
-                  sx={{
-                    textTransform: "none",
-                    fontWeight: 500,
-                    borderRadius: 1.5,
-                    py: 1,
-                    fontSize: "0.8rem",
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                    color: theme.palette.common.white,
-                    "&:hover": {
-                      background: `linear-gradient(135deg, #b71c1c 0%, #8e0000 100%)`,
-                      transform: "translateY(-1px)",
-                      boxShadow: 3,
-                    },
-                    "&:disabled": {
-                      background: theme.palette.action.disabledBackground,
-                      color: theme.palette.action.disabled,
-                    },
-                    transition: "all 0.2s ease-in-out",
-                  }}
-                >
-                  {loading ? "Generando PDF..." : "Descargar Planilla PDF"}
-                </Button>
-              )}
-            </PDFDownloadLink>
+            <PdfExportButton paciente={paciente} />
           </Box>
         </Box>
       </Paper>

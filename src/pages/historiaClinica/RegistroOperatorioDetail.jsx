@@ -1,108 +1,94 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { HistoriaClinicaLayout } from "@/components/layout/HistoriaClinicaLayout";
-import { InfoField } from "@/components/shared/InfoField";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit } from "lucide-react";
-import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice";
-import { RegistroOperatorioForm } from "@/features/registroOperatorio/RegistroOperatorioForm";
-import { CustomTabs } from "@/components/shared/CustomTabs";
-import { RasgosClinicosOperatoriosPanel } from "@/features/registroOperatorio/RasgosClinicosOperatoriosPanel";
-import { RegistrosPosoperatoriosPanel } from "@/features/registroOperatorio/RegistrosPosoperatoriosPanel";
+import { useState, useEffect } from "react"
+import { useNavigate, useLocation } from "react-router-dom"
+import { HistoriaClinicaLayout } from "@/components/layout/HistoriaClinicaLayout"
+import { InfoField } from "@/components/shared/InfoField"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button, Paper, Box } from "@mui/material"
+import { ArrowLeft, Edit } from "lucide-react"
+import axios from "axios"
+import { useDispatch, useSelector } from "react-redux"
+import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
+import { RegistroOperatorioForm } from "@/features/registroOperatorio/RegistroOperatorioForm"
+import { MuiTabs } from "@/components/shared/MuiTabs"
+import { RasgosClinicosOperatoriosPanel } from "@/features/registroOperatorio/RasgosClinicosOperatoriosPanel"
+import { RegistrosPosoperatoriosPanel } from "@/features/registroOperatorio/RegistrosPosoperatoriosPanel"
 
 function RegistroOperatorioDetail() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const dispatch = useDispatch();
-  const { datos: paciente } = useSelector((state) => state.historiaClinica);
-  const [registroOperatorio, setRegistroOperatorio] = useState(null);
-  const [episodio, setEpisodio] = useState(null);
-  const [editing, setEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
-  const apiUrl = import.meta.env.VITE_API_BACKEND;
+  const navigate = useNavigate()
+  const location = useLocation()
+  const dispatch = useDispatch()
+  const { datos: paciente } = useSelector((state) => state.historiaClinica)
+  const [registroOperatorio, setRegistroOperatorio] = useState(null)
+  const [episodio, setEpisodio] = useState(null)
+  const [editing, setEditing] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState(0)
+  const apiUrl = import.meta.env.VITE_API_BACKEND
 
   // Recuperar datos del registro operatorio y episodio desde sessionStorage
   useEffect(() => {
-    const storedRegistro = sessionStorage.getItem("selectedRegistroOperatorio");
-    const storedEpisodio = sessionStorage.getItem("selectedEpisodio");
+    const storedRegistro = sessionStorage.getItem("selectedRegistroOperatorio")
+    const storedEpisodio = sessionStorage.getItem("selectedEpisodio")
 
     if (storedRegistro && storedEpisodio) {
-      setRegistroOperatorio(JSON.parse(storedRegistro));
-      setEpisodio(JSON.parse(storedEpisodio));
+      setRegistroOperatorio(JSON.parse(storedRegistro))
+      setEpisodio(JSON.parse(storedEpisodio))
     }
-  }, [location.search]);
+  }, [location.search])
 
   // Si no hay datos, mostrar mensaje
   if (!registroOperatorio || !episodio || !paciente) {
     return (
       <HistoriaClinicaLayout title="Detalle del Registro Operatorio">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-8 text-center">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            No se encontraron datos del registro operatorio
-          </h2>
-          <Button
-            onClick={() => navigate(-1)} // Volver a la página anterior
-            className="mt-4"
-          >
-            <ArrowLeft size={16} className="mr-2" /> Volver
+        <Paper elevation={1} sx={{ p: 4, textAlign: "center", borderRadius: 2 }}>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">No se encontraron datos del registro operatorio</h2>
+          <Button onClick={() => navigate(-1)} variant="contained" startIcon={<ArrowLeft size={16} />} sx={{ mt: 2 }}>
+            Volver
           </Button>
-        </div>
+        </Paper>
       </HistoriaClinicaLayout>
-    );
+    )
   }
 
   // Iniciar edición
   const handleEdit = () => {
-    setEditing(true);
-  };
+    setEditing(true)
+  }
 
   // Cancelar edición
   const handleCancel = () => {
-    setEditing(false);
-  };
+    setEditing(false)
+  }
 
   // Guardar cambios
   const handleSubmit = async (formData) => {
-    setLoading(true);
+    setLoading(true)
 
     try {
       const dataToSend = {
         ...formData,
         episodio: episodio.id,
-      };
+      }
 
-      const response = await axios.put(
-        `${apiUrl}registro_operatorio/${registroOperatorio.id}/`,
-        dataToSend
-      );
+      const response = await axios.put(`${apiUrl}registro_operatorio/${registroOperatorio.id}/`, dataToSend)
 
-      // Actualizar el estado local
-      setRegistroOperatorio(response.data);
+      setRegistroOperatorio(response.data)
+      sessionStorage.setItem("selectedRegistroOperatorio", JSON.stringify(response.data))
 
-      // Actualizar sessionStorage
-      sessionStorage.setItem("selectedRegistroOperatorio", JSON.stringify(response.data));
+      const historiaResponse = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      dispatch(setHistoriaClinica(historiaResponse.data))
 
-      // Actualizar el estado en Redux
-      const historiaResponse = await axios.get(
-        `${apiUrl}gestionar_historia_clinica/${paciente.id}/`
-      );
-      dispatch(setHistoriaClinica(historiaResponse.data));
-
-      setEditing(false);
-      alert("Registro operatorio actualizado correctamente");
+      setEditing(false)
+      alert("Registro operatorio actualizado correctamente")
     } catch (error) {
-      console.error("Error al actualizar:", error);
-      alert("Error al actualizar el registro operatorio");
+      console.error("Error al actualizar:", error)
+      alert("Error al actualizar el registro operatorio")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Campos a mostrar en la pestaña de información
   const campos = [
@@ -125,7 +111,7 @@ function RegistroOperatorioDetail() {
       key: "estado_egreso",
       format: (value) => (value ? "Favorable" : "Desfavorable"),
     },
-  ];
+  ]
 
   // Configuración de las pestañas
   const tabs = [
@@ -133,7 +119,6 @@ function RegistroOperatorioDetail() {
       label: "Información General",
       content: (
         <div className="space-y-6">
-          {/* Información básica del registro operatorio */}
           <Card>
             <CardHeader>
               <CardTitle>Información del Registro Operatorio</CardTitle>
@@ -144,18 +129,13 @@ function RegistroOperatorioDetail() {
                   <InfoField
                     key={campo.key}
                     label={campo.label}
-                    value={
-                      campo.format
-                        ? campo.format(registroOperatorio[campo.key])
-                        : registroOperatorio[campo.key]
-                    }
+                    value={campo.format ? campo.format(registroOperatorio[campo.key]) : registroOperatorio[campo.key]}
                   />
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* Observaciones */}
           <Card>
             <CardHeader>
               <CardTitle>Observaciones</CardTitle>
@@ -174,7 +154,7 @@ function RegistroOperatorioDetail() {
     {
       label: "Rasgos Clínicos Operatorios",
       content: (
-        <RasgosClinicosOperatoriosPanel 
+        <RasgosClinicosOperatoriosPanel
           registroOperatorioId={registroOperatorio.id}
           RasgosClinicos={registroOperatorio.rasgos_clinicos_operatorios || []}
         />
@@ -183,37 +163,34 @@ function RegistroOperatorioDetail() {
     {
       label: "Registros Posoperatorios",
       content: (
-        <RegistrosPosoperatoriosPanel 
+        <RegistrosPosoperatoriosPanel
           registroOperatorioId={registroOperatorio.id}
           RegistrosPosoperatorios={registroOperatorio.registros_posoperatorios}
         />
       ),
     },
-  ];
-
-  // Manejar cambio de pestaña
-  const handleTabChange = (index) => {
-    setActiveTab(index);
-  };
+  ]
 
   return (
     <HistoriaClinicaLayout title="Detalle del Registro Operatorio">
-      <div className="flex justify-between items-center mb-4">
-        <Button onClick={() => navigate(-1)} variant="outline">
-          <ArrowLeft size={16} className="mr-2" /> Volver
+      <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Button onClick={() => navigate(-1)} variant="outlined" startIcon={<ArrowLeft size={16} />}>
+          Volver
         </Button>
         {!editing && activeTab === 0 && (
           <Button
             onClick={handleEdit}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            variant="contained"
+            startIcon={<Edit size={16} />}
+            sx={{ bgcolor: "primary.main", "&:hover": { bgcolor: "primary.dark" } }}
           >
-            <Edit size={16} className="mr-2" /> Editar
+            Editar
           </Button>
         )}
-      </div>
+      </Box>
 
       {editing ? (
-        <Card>
+        <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
           <CardHeader>
             <CardTitle>Editar Registro Operatorio</CardTitle>
           </CardHeader>
@@ -225,18 +202,14 @@ function RegistroOperatorioDetail() {
               onCancel={handleCancel}
             />
           </CardContent>
-        </Card>
+        </Paper>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-1">
-          <CustomTabs
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-          />
-        </div>
+        <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
+          <MuiTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        </Paper>
       )}
     </HistoriaClinicaLayout>
-  );
+  )
 }
 
-export default RegistroOperatorioDetail;
+export default RegistroOperatorioDetail

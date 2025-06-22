@@ -67,7 +67,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto"
+      className="fixed inset-0 z-2000 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto"
       onClick={handleBackdropClick}
     >
       <div 
@@ -80,14 +80,14 @@ export function Modal({
         tabIndex={-1} // Para hacerlo focusable
       >
         {/* Header del modal */}
-        <div className="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
+        <div className="flex justify-between  items-center p-4 border-b sticky top-0 bg-white z-10">
           <h2 className="text-xl text-gray-800 font-semibold">{title}</h2>
           <button 
             onClick={onClose} 
             className="text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
             aria-label="Cerrar modal"
           >
-            <X size={20} />
+            <X size={20} color="#ffffff"/>
           </button>
         </div>
 

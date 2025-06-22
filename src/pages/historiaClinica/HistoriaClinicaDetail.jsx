@@ -4,10 +4,11 @@ import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom"
 import { HistoriaClinicaLayout } from "@/components/layout/HistoriaClinicaLayout"
-import { CustomTabs } from "@/components/shared/CustomTabs"
+import { MuiTabs } from "@/components/shared/MuiTabs"
 import { InformacionBasicaPanel } from "@/features/general/InformacionBasicaPanel"
 import { RasgosClinicosPanel } from "@/features/general/RasgosClinicosPanel"
 import { EpisodiosPanel } from "@/features/general/EpisodiosPanel"
+import { Paper } from "@mui/material"
 
 function HistoriaClinicaDetail() {
   const { datos } = useSelector((state) => state.historiaClinica)
@@ -58,9 +59,9 @@ function HistoriaClinicaDetail() {
 
   return (
     <HistoriaClinicaLayout title="Historia Clínica del Paciente">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-1">
-        <CustomTabs tabs={tabs} activeTab={activeTab} onTabChange={handleTabChange} />
-      </div>
+      <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
+        <MuiTabs tabs={tabs} activeTab={activeTab} onTabChange={handleTabChange} />
+      </Paper>
     </HistoriaClinicaLayout>
   )
 }
