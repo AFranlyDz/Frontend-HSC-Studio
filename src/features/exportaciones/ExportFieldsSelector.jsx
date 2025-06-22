@@ -1,6 +1,6 @@
-"use client";
-import React, { useState, useCallback } from "react";
-import axios from "axios";
+"use client"
+import { useState, useCallback } from "react"
+import axios from "axios"
 import {
   Button,
   Checkbox,
@@ -9,14 +9,24 @@ import {
   Collapse,
   IconButton,
   CircularProgress,
-} from "@mui/material";
-import { ExpandMore, ExpandLess } from "@mui/icons-material";
+  Box,
+  Typography,
+  Paper,
+  Divider,
+  Chip,
+  useTheme,
+  alpha,
+} from "@mui/material"
+import { ExpandMore, ExpandLess, SelectAll, ClearAll } from "@mui/icons-material"
 
 const ExportFieldsSelector = ({ onClose }) => {
-  const [selectedFields, setSelectedFields] = useState(new Set());
-  const [expandedGroups, setExpandedGroups] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const apiUrl = import.meta.env.VITE_API_BACKEND;
+  const [selectedFields, setSelectedFields] = useState(new Set())
+  const [expandedGroups, setExpandedGroups] = useState({
+    "Historia Clínica": true, // Expandir por defecto el grupo principal
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const theme = useTheme()
+  const apiUrl = import.meta.env.VITE_API_BACKEND
 
   // Definición de grupos de campos basados en los modelos
   const fieldDisplayNames = {
@@ -30,10 +40,10 @@ const ExportFieldsSelector = ({ onClose }) => {
     "historia_clinica.historial_trauma_craneal": "Historial de Trauma Craneal",
     "historia_clinica.manualidad": "Manualidad (Diestro/Zurdo)",
     "historia_clinica.antecedentes_familiares": "Antecedentes Familiares",
-    
+
     // Rasgos Clínicos Globales
     "rasgo_clinico_global.notas": "Notas de Rasgos Clínicos",
-    
+
     // Episodio
     "episodio.inicio": "Fecha de Inicio del Episodio",
     "episodio.fecha_alta": "Fecha de Alta del Episodio",
@@ -43,25 +53,25 @@ const ExportFieldsSelector = ({ onClose }) => {
     "episodio.descripcion_antecedente": "Descripción del Antecedente",
     "episodio.edad_paciente": "Edad del Paciente en el Episodio",
     "episodio.observaciones": "Observaciones del Episodio",
-    
+
     // Rasgos Clínicos del Episodio
     "rasgo_clinico_episodio.tiempo": "Tiempo de Rasgos Clínicos",
     "rasgo_clinico_episodio.notas": "Notas de Rasgos Clínicos",
-    
+
     // Registro Operatorio
     "registro_operatorio.fecha_operacion": "Fecha de Operación",
     "registro_operatorio.es_reintervencion": "¿Es Reintervención?",
     "registro_operatorio.escala_evaluacion_resultados_glasgow": "Escala de Glasgow",
     "registro_operatorio.estado_egreso": "Estado al Egreso",
     "registro_operatorio.observaciones": "Observaciones Operatorias",
-    
+
     // Registro Posoperatorio
     "registro_posoperatorio.fecha": "Fecha Posoperatoria",
     "registro_posoperatorio.tiempo_transcurrido": "Tiempo Transcurrido",
     "registro_posoperatorio.escala_pronostica_oslo_posoperatoria": "Escala Pronóstica Oslo",
     "registro_posoperatorio.recurrencia_hematoma": "Recurrencia de Hematoma",
     "registro_posoperatorio.gradacion_pronostica_para_recurrencia_hsc_unilateral": "Gradación de Recurrencia",
-    
+
     // Hematoma Subdural
     "hematoma.escala_glasgow_ingreso": "Escala Glasgow al Ingreso",
     "hematoma.escala_mcwalder": "Escala McWalder",
@@ -86,13 +96,13 @@ const ExportFieldsSelector = ({ onClose }) => {
     "hematoma.desviacion_linea_media": "Desviación de Línea Media",
     "hematoma.metodo_lectura": "Método de Lectura",
     "hematoma.observaciones": "Observaciones del Hematoma",
-    
+
     // Codificadores
     "codificador.nombre": "Nombre del Codificador",
     "codificador.nombre_corto": "Nombre Corto",
     "codificador.descripcion": "Descripción",
-    "codificador.clasificacion": "Clasificación"
-  };
+    "codificador.clasificacion": "Clasificación",
+  }
 
   const fieldGroups = {
     "Historia Clínica": [
@@ -106,10 +116,8 @@ const ExportFieldsSelector = ({ onClose }) => {
       "historia_clinica.manualidad",
       "historia_clinica.antecedentes_familiares",
     ],
-    "Rasgos Clínicos Globales": [
-      "rasgo_clinico_global.notas",
-    ],
-    "Episodio": [
+    "Rasgos Clínicos Globales": ["rasgo_clinico_global.notas"],
+    Episodio: [
       "episodio.inicio",
       "episodio.fecha_alta",
       "episodio.tiempo_estadia",
@@ -119,10 +127,7 @@ const ExportFieldsSelector = ({ onClose }) => {
       "episodio.edad_paciente",
       "episodio.observaciones",
     ],
-    "Rasgos Clínicos del Episodio": [
-      "rasgo_clinico_episodio.tiempo",
-      "rasgo_clinico_episodio.notas",
-    ],
+    "Rasgos Clínicos del Episodio": ["rasgo_clinico_episodio.tiempo", "rasgo_clinico_episodio.notas"],
     "Registro Operatorio": [
       "registro_operatorio.fecha_operacion",
       "registro_operatorio.es_reintervencion",
@@ -162,111 +167,124 @@ const ExportFieldsSelector = ({ onClose }) => {
       "hematoma.metodo_lectura",
       "hematoma.observaciones",
     ],
-    "Rasgos Clínicos Operatorios": [
-    ],
-    "Codificadores": [
+    Codificadores: [
       "codificador.nombre",
       "codificador.nombre_corto",
       "codificador.descripcion",
-      "codificador.clasificacion"
-    ]
-  };
+      "codificador.clasificacion",
+    ],
+  }
 
   // Manejar cambio de selección
   const handleToggle = useCallback((field) => {
     setSelectedFields((prev) => {
-      const newSelection = new Set(prev);
+      const newSelection = new Set(prev)
       if (newSelection.has(field)) {
-        newSelection.delete(field);
+        newSelection.delete(field)
       } else {
-        newSelection.add(field);
+        newSelection.add(field)
       }
-      return newSelection;
-    });
-  }, []);
+      return newSelection
+    })
+  }, [])
 
   // Seleccionar/deseleccionar todo un grupo
   const toggleGroup = useCallback(
     (groupName, select) => {
       setSelectedFields((prev) => {
-        const newSelection = new Set(prev);
+        const newSelection = new Set(prev)
         fieldGroups[groupName].forEach((field) => {
           if (select) {
-            newSelection.add(field);
+            newSelection.add(field)
           } else {
-            newSelection.delete(field);
+            newSelection.delete(field)
           }
-        });
-        return newSelection;
-      });
+        })
+        return newSelection
+      })
     },
-    [fieldGroups]
-  );
+    [fieldGroups],
+  )
 
   // Seleccionar/deseleccionar todos los campos
   const toggleAllFields = useCallback(
     (select) => {
       setSelectedFields((prev) => {
-        const newSelection = new Set();
+        const newSelection = new Set()
         if (select) {
           Object.values(fieldGroups).forEach((group) => {
-            group.forEach((field) => newSelection.add(field));
-          });
+            group.forEach((field) => newSelection.add(field))
+          })
         }
-        return newSelection;
-      });
+        return newSelection
+      })
     },
-    [fieldGroups]
-  );
+    [fieldGroups],
+  )
 
-  const handleSubmit = async () => {
-    if (selectedFields.size === 0) return;
+  const handleSubmit = async (event) => {
+    event?.stopPropagation()
 
-    setIsLoading(true);
+    if (selectedFields.size === 0) return
+
+    setIsLoading(true)
     try {
+      console.log("Iniciando exportación con campos:", [...selectedFields]) // Debug
+
       const response = await axios.post(
         `${apiUrl}export-csv/`,
         { fields: [...selectedFields] },
-        { responseType: "blob" } // Importante para manejar la descarga del archivo
-      );
+        { responseType: "blob" },
+      )
 
       // Crear el enlace de descarga
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "exportacion.csv");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement("a")
+      link.href = url
+      link.setAttribute("download", "exportacion.csv")
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
 
-      onClose();
+      console.log("Exportación completada, cerrando modal") // Debug
+      onClose()
     } catch (error) {
-      console.error("Error al exportar CSV:", error);
-      alert("Error al exportar el archivo CSV");
+      console.error("Error al exportar CSV:", error)
+      alert("Error al exportar el archivo CSV")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Renderizar grupo de campos
   const renderGroup = (groupName) => {
-    const isExpanded = expandedGroups[groupName] !== false;
-    const allSelected = fieldGroups[groupName].every((f) =>
-      selectedFields.has(f)
-    );
-    const someSelected = fieldGroups[groupName].some((f) =>
-      selectedFields.has(f)
-    );
+    const isExpanded = expandedGroups[groupName] !== false
+    const allSelected = fieldGroups[groupName].every((f) => selectedFields.has(f))
+    const someSelected = fieldGroups[groupName].some((f) => selectedFields.has(f))
 
     return (
-      <div key={groupName} className="mb-2 text-gray-800">
-        <div className="flex items-center bg-gray-50 p-2 rounded text-gray-800">
-          <IconButton
-            size="small"
-            onClick={() =>
-              setExpandedGroups((p) => ({ ...p, [groupName]: !isExpanded }))
-            }
-          >
+      <Paper
+        key={groupName}
+        elevation={1}
+        sx={{
+          mb: 1,
+          borderRadius: 2,
+          overflow: "hidden",
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            bgcolor: alpha(theme.palette.primary.main, 0.04),
+            p: 1,
+            cursor: "pointer",
+          }}
+          onClick={() => setExpandedGroups((p) => ({ ...p, [groupName]: !isExpanded }))}
+        >
+          <IconButton size="small" sx={{ mr: 1 }}>
             {isExpanded ? <ExpandLess /> : <ExpandMore />}
           </IconButton>
           <FormControlLabel
@@ -274,16 +292,34 @@ const ExportFieldsSelector = ({ onClose }) => {
               <Checkbox
                 checked={allSelected}
                 indeterminate={!allSelected && someSelected}
-                onChange={(e) => toggleGroup(groupName, e.target.checked)}
+                onChange={(e) => {
+                  e.stopPropagation()
+                  toggleGroup(groupName, e.target.checked)
+                }}
+                onClick={(e) => e.stopPropagation()}
               />
             }
-            label={<span className="font-medium">{groupName}</span>}
-            className="flex-grow ml-2"
+            label={
+              <Typography variant="subtitle2" fontWeight={600} color="primary">
+                {groupName}
+              </Typography>
+            }
+            sx={{ flexGrow: 1, ml: 1, mr: 0 }}
+            onClick={(e) => e.stopPropagation()}
           />
-        </div>
+          {someSelected && (
+            <Chip
+              label={fieldGroups[groupName].filter((f) => selectedFields.has(f)).length}
+              size="small"
+              color="primary"
+              variant="outlined"
+              sx={{ mr: 1 }}
+            />
+          )}
+        </Box>
 
         <Collapse in={isExpanded}>
-          <div className="pl-10 pt-2">
+          <Box sx={{ p: 2, pt: 1 }}>
             <FormGroup>
               {fieldGroups[groupName].map((field) => (
                 <FormControlLabel
@@ -293,26 +329,33 @@ const ExportFieldsSelector = ({ onClose }) => {
                       checked={selectedFields.has(field)}
                       onChange={() => handleToggle(field)}
                       size="small"
+                      sx={{ py: 0.5 }}
                     />
                   }
-                  label={fieldDisplayNames[field] || field}
-                  className="ml-2"
+                  label={
+                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                      {fieldDisplayNames[field] || field}
+                    </Typography>
+                  }
+                  sx={{ ml: 2, my: 0.25 }}
                 />
               ))}
             </FormGroup>
-          </div>
+          </Box>
         </Collapse>
-      </div>
-    );
-  };
+      </Paper>
+    )
+  }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-2">
+    <Box sx={{ p: 0 }}>
+      {/* Header con controles */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <Button
             variant="outlined"
             size="small"
+            startIcon={<SelectAll />}
             onClick={() => toggleAllFields(true)}
             sx={{ textTransform: "none" }}
           >
@@ -321,28 +364,47 @@ const ExportFieldsSelector = ({ onClose }) => {
           <Button
             variant="outlined"
             size="small"
+            startIcon={<ClearAll />}
             onClick={() => toggleAllFields(false)}
             sx={{ textTransform: "none" }}
           >
             Limpiar selección
           </Button>
-        </div>
-        <span className="text-sm text-gray-600">
-          {selectedFields.size} campos seleccionados
-        </span>
-      </div>
+        </Box>
+        <Chip
+          label={`${selectedFields.size} campos seleccionados`}
+          color={selectedFields.size > 0 ? "primary" : "default"}
+          variant="outlined"
+        />
+      </Box>
 
-      <div className="border rounded-lg p-4 max-h-[500px] overflow-y-auto">
+      {/* Lista de grupos */}
+      <Box
+        sx={{
+          maxHeight: 400,
+          overflowY: "auto",
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 2,
+          p: 2,
+          bgcolor: alpha(theme.palette.background.paper, 0.5),
+        }}
+      >
         {Object.keys(fieldGroups).map(renderGroup)}
-      </div>
+      </Box>
 
-      <div className="flex justify-end space-x-2 pt-2">
+      <Divider sx={{ my: 3 }} />
+
+      {/* Botones de acción */}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
         <Button
           variant="outlined"
-          onClick={onClose}
-          size="small"
-          sx={{ textTransform: "none" }}
+          onClick={(e) => {
+            e.stopPropagation()
+            console.log("Cancelando exportación") // Debug
+            onClose()
+          }}
           disabled={isLoading}
+          sx={{ textTransform: "none" }}
         >
           Cancelar
         </Button>
@@ -351,14 +413,24 @@ const ExportFieldsSelector = ({ onClose }) => {
           color="primary"
           disabled={selectedFields.size === 0 || isLoading}
           onClick={handleSubmit}
-          size="small"
-          sx={{ textTransform: "none", minWidth: 120 }}
+          sx={{
+            textTransform: "none",
+            minWidth: 140,
+            position: "relative",
+          }}
         >
-          {isLoading ? <CircularProgress size={24} /> : "Exportar selección"}
+          {isLoading ? (
+            <>
+              <CircularProgress size={20} sx={{ mr: 1 }} />
+              Exportando...
+            </>
+          ) : (
+            "Exportar selección"
+          )}
         </Button>
-      </div>
-    </div>
-  );
-};
+      </Box>
+    </Box>
+  )
+}
 
-export default ExportFieldsSelector;
+export default ExportFieldsSelector

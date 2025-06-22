@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { Button, useTheme, alpha } from "@mui/material"
-import { TableChart } from "@mui/icons-material"
-import { Modal } from "@/components/ui/modal"
+import { Button, useTheme, alpha, Dialog, DialogTitle, DialogContent, IconButton } from "@mui/material"
+import { TableChart, Close } from "@mui/icons-material"
 import ExportFieldsSelector from "@/features/exportaciones/ExportFieldsSelector"
 import { useSnackbar } from "notistack"
 import { useSelector } from "react-redux"
@@ -14,13 +13,26 @@ export const ExportButton = () => {
   const { datos } = useSelector((state) => state.historiaClinica)
   const theme = useTheme()
 
-  const handleExportClick = useCallback(() => {
-    if (!datos) {
-      enqueueSnackbar("No hay datos disponibles para exportar", { variant: "warning" })
-      return
-    }
-    setIsModalOpen(true)
-  }, [datos, enqueueSnackbar])
+  const handleExportClick = useCallback(
+    (event) => {
+      event.stopPropagation()
+      event.preventDefault()
+
+      if (!datos) {
+        enqueueSnackbar("No hay datos disponibles para exportar", { variant: "warning" })
+        return
+      }
+
+      console.log("Abriendo modal de exportación") // Para debug
+      setIsModalOpen(true)
+    },
+    [datos, enqueueSnackbar],
+  )
+
+  const handleCloseModal = useCallback(() => {
+    console.log("Cerrando modal de exportación") // Para debug
+    setIsModalOpen(false)
+  }, [])
 
   return (
     <>
@@ -55,18 +67,57 @@ export const ExportButton = () => {
         Exportar CSV
       </Button>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Seleccionar columnas para exportar"
-        size="lg"
+      <Dialog
+        open={isModalOpen}
+        onClose={(event, reason) => {
+          // Prevenir cierre accidental
+          if (reason === "backdropClick" || reason === "escapeKeyDown") {
+            console.log("Intento de cierre prevenido:", reason)
+            return
+          }
+          handleCloseModal()
+        }}
+        maxWidth="md"
+        fullWidth
+        disableEscapeKeyDown
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            minHeight: 600,
+          },
+          onClick: (e) => e.stopPropagation(),
+        }}
       >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">Selecciona los campos que deseas incluir en el archivo CSV.</p>
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            pb: 1,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          Seleccionar columnas para exportar
+          <IconButton
+            onClick={handleCloseModal}
+            size="small"
+            sx={{
+              color: theme.palette.grey[500],
+              "&:hover": {
+                bgcolor: alpha(theme.palette.grey[500], 0.1),
+              },
+            }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
 
-          <ExportFieldsSelector data={datos} onClose={() => setIsModalOpen(false)} />
-        </div>
-      </Modal>
+        <DialogContent sx={{ p: 3 }}>
+          <ExportFieldsSelector onClose={handleCloseModal} />
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
+
+export default ExportButton
