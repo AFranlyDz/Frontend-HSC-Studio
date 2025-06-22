@@ -1,84 +1,78 @@
-"use client";
+"use client"
 
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { RasgosClinicosOperatoriosSection } from "./RasgosClinicosOperatoriosSection";
-import { EditarRasgosClinicosOperatoriosForm } from "./EditarRasgosClinicosOperatoriosForm";
+import axios from "axios"
+import { useEffect, useState } from "react"
+import { EmptyState } from "@/components/shared/EmptyState"
+import { EditarRasgosClinicosOperatoriosForm } from "./EditarRasgosClinicosOperatoriosForm"
+import {
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from "@mui/material"
+import { Edit, ExpandMore } from "@mui/icons-material"
 
-export const RasgosClinicosOperatoriosPanel = ({
-  registroOperatorioId,
-  RasgosClinicos,
-}) => {
-  const [editing, setEditing] = useState(false);
-  const [rasgosClinicos, setRasgosClinicos] = useState(RasgosClinicos);
-  const apiUrl = import.meta.env.VITE_API_BACKEND;
+export const RasgosClinicosOperatoriosPanel = ({ registroOperatorioId, RasgosClinicos }) => {
+  const [editing, setEditing] = useState(false)
+  const [rasgosClinicos, setRasgosClinicos] = useState(RasgosClinicos)
+  const apiUrl = import.meta.env.VITE_API_BACKEND
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `${apiUrl}rasgos_operatorios_lectura/?registro_operatorio__id=${registroOperatorioId}`
-        );
-        setRasgosClinicos(response.data);
+          `${apiUrl}rasgos_operatorios_lectura/?registro_operatorio__id=${registroOperatorioId}`,
+        )
+        setRasgosClinicos(response.data)
       } catch (error) {
-        console.error("Error al cargar datos:", error);
+        console.error("Error al cargar datos:", error)
       }
-    };
-    fetchData();
-  }, [registroOperatorioId, apiUrl]);	
+    }
+    fetchData()
+  }, [registroOperatorioId, apiUrl])
 
   // Clasificaciones de rasgos clínicos operatorios
-  const clasificaciones = [
-    "Tratamiento Quírurgico",
-    "Complicaciones Médicas",
-    "Complicaciones Cirugía",
-  ];
+  const clasificaciones = ["Tratamiento Quírurgico", "Complicaciones Médicas", "Complicaciones Cirugía"]
 
-  const hasRasgos = rasgosClinicos && rasgosClinicos.length > 0;
+  const hasRasgos = rasgosClinicos && rasgosClinicos.length > 0
 
   const handleCancel = (actualizado) => {
-    setEditing(false);
-    setRasgosClinicos(actualizado);
-  };
+    setEditing(false)
+    setRasgosClinicos(actualizado)
+  }
+
+  // Función para obtener color del chip según clasificación
+  const getChipColor = (clasificacion) => {
+    const colors = {
+      "Tratamiento Quírurgico": "primary",
+      "Complicaciones Médicas": "warning",
+      "Complicaciones Cirugía": "error",
+    }
+    return colors[clasificacion] || "default"
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center">
-          <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
           Rasgos Clínicos Operatorios
-        </h2>
-        <button
+        </Typography>
+        <Button
           onClick={() => setEditing(!editing)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center"
+          variant="contained"
+          startIcon={editing ? null : <Edit />}
+          color={editing ? "error" : "primary"}
+          sx={{ textTransform: "none" }}
         >
-          <span className="mr-1">{editing ? "Cancelar" : "Editar"}</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            {editing ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-              />
-            )}
-          </svg>
-        </button>
-      </div>
+          {editing ? "Cancelar" : "Editar"}
+        </Button>
+      </Box>
 
       {editing ? (
         <EditarRasgosClinicosOperatoriosForm
@@ -89,24 +83,53 @@ export const RasgosClinicosOperatoriosPanel = ({
       ) : !hasRasgos ? (
         <EmptyState message="No existen rasgos clínicos operatorios registrados" />
       ) : (
-        <div className="space-y-8 w-full">
+        <Box>
           {clasificaciones.map((clasificacion) => {
-            const items = rasgosClinicos.filter(
-              (item) => item.codificador.clasificacion === clasificacion
-            );
-            if (items.length > 0) {
-              return (
-                <RasgosClinicosOperatoriosSection
-                  key={clasificacion}
-                  title={clasificacion}
-                  items={items}
-                />
-              );
-            }
-            return null;
+            const items = rasgosClinicos.filter((item) => item.codificador.clasificacion === clasificacion)
+
+            if (items.length === 0) return null
+
+            return (
+              <Accordion key={clasificacion} defaultExpanded sx={{ mb: 2 }}>
+                <AccordionSummary expandIcon={<ExpandMore />}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      {clasificacion}
+                    </Typography>
+                    <Chip
+                      label={`${items.length} item${items.length > 1 ? "s" : ""}`}
+                      size="small"
+                      color={getChipColor(clasificacion)}
+                      variant="outlined"
+                    />
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container spacing={2}>
+                    {items.map((item) => (
+                      <Grid item xs={12} sm={6} md={4} key={item.id}>
+                        <Card
+                          variant="outlined"
+                          sx={{ height: "100%", transition: "all 0.2s", "&:hover": { boxShadow: 2 } }}
+                        >
+                          <CardContent sx={{ p: 2 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: "primary.main" }}>
+                              {item.codificador.nombre}
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontSize: "0.875rem", color: "text.secondary" }}>
+                              {item.codificador.descripcion}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
+            )
           })}
-        </div>
+        </Box>
       )}
-    </div>
-  );
-};
+    </Box>
+  )
+}

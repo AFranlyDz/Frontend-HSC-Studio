@@ -62,7 +62,7 @@ export const MuiTabs = ({ tabs, activeTab = 0, onTabChange }) => {
           }}
         >
           {tabs.map((tab, index) => (
-            <Tab key={index} label={tab.label} {...a11yProps(index)} />
+            <Tab key={index} label={tab.label} icon={tab.icon||null} iconPosition={tab.iconPosition||null} {...a11yProps(index)} />
           ))}
         </Tabs>
       </Box>

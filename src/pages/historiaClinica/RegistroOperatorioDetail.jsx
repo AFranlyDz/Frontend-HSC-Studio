@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { HistoriaClinicaLayout } from "@/components/layout/HistoriaClinicaLayout"
-import { InfoField } from "@/components/shared/InfoField"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button, Paper, Box } from "@mui/material"
+import { InfoFieldCompact } from "@/components/shared/InfoFieldCompact"
+import { Button, Paper, Box, Card, CardContent, CardHeader, Typography } from "@mui/material"
 import { ArrowLeft, Edit } from "lucide-react"
 import axios from "axios"
 import { useDispatch, useSelector } from "react-redux"
@@ -14,6 +13,7 @@ import { RegistroOperatorioForm } from "@/features/registroOperatorio/RegistroOp
 import { MuiTabs } from "@/components/shared/MuiTabs"
 import { RasgosClinicosOperatoriosPanel } from "@/features/registroOperatorio/RasgosClinicosOperatoriosPanel"
 import { RegistrosPosoperatoriosPanel } from "@/features/registroOperatorio/RegistrosPosoperatoriosPanel"
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
 
 function RegistroOperatorioDetail() {
   const navigate = useNavigate()
@@ -116,39 +116,53 @@ function RegistroOperatorioDetail() {
   // Configuración de las pestañas
   const tabs = [
     {
-      label: "Información General",
+      label: "Registro Operatorio",
+      icon: <InfoOutlineIcon />,
+      iconPosition: "start",
       content: (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Información del Registro Operatorio</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Box sx={{ p: 3 }}>
+          <Card variant="outlined" sx={{ mb: 3 }}>
+            <CardHeader
+              title="Información del Registro Operatorio"
+              sx={{
+                bgcolor: "grey.50",
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                py: 2,
+              }}
+            />
+            <CardContent sx={{ p: 0 }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                 {campos.map((campo) => (
-                  <InfoField
+                  <InfoFieldCompact
                     key={campo.key}
                     label={campo.label}
                     value={campo.format ? campo.format(registroOperatorio[campo.key]) : registroOperatorio[campo.key]}
                   />
                 ))}
-              </div>
+              </Box>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Observaciones</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <p className="text-gray-800">
-                  {registroOperatorio.observaciones || "No hay observaciones registradas"}
-                </p>
-              </div>
+          <Card variant="outlined">
+            <CardHeader
+              title="Observaciones"
+              sx={{
+                bgcolor: "grey.50",
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                py: 2,
+              }}
+            />
+            <CardContent sx={{ p: 0 }}>
+              <InfoFieldCompact
+                label="Observaciones"
+                value={registroOperatorio.observaciones || "No hay observaciones registradas"}
+                gridColumn={2}
+              />
             </CardContent>
           </Card>
-        </div>
+        </Box>
       ),
     },
     {
@@ -191,17 +205,17 @@ function RegistroOperatorioDetail() {
 
       {editing ? (
         <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
-          <CardHeader>
-            <CardTitle>Editar Registro Operatorio</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 3 }}>
+              Editar Registro Operatorio
+            </Typography>
             <RegistroOperatorioForm
               initialData={registroOperatorio}
               onSubmit={handleSubmit}
               isLoading={loading}
               onCancel={handleCancel}
             />
-          </CardContent>
+          </Box>
         </Paper>
       ) : (
         <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>

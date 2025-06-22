@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { InfoField } from "@/components/shared/InfoField"
+import { InfoFieldCompact } from "@/components/shared/InfoFieldCompact"
 import { useFormatValue } from "@/hooks/useFormatValue"
 import { useCustomAlert } from "@/hooks/useCustomAlert"
 import { Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Box, Card, CardContent, CardHeader, Typography } from "@mui/material"
 import axios from "axios"
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
 
@@ -324,22 +325,23 @@ Por favor, tome nota de este dato.`,
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center">
-          <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
           Información Básica
-        </h2>
+        </Typography>
         {!editing ? (
-          <button
+          <Button
             onClick={handleEdit}
+            variant="contained"
+            sx={{ textTransform: "none" }}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center"
           >
             <Edit size={16} className="mr-1" />
             Editar
-          </button>
+          </Button>
         ) : null}
-      </div>
+      </Box>
 
       {editing ? (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -363,12 +365,29 @@ Por favor, tome nota de este dato.`,
           </div>
         </form>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {campos.map((campo) => (
-            <InfoField key={campo.key} label={campo.label} value={formatValue(campo.key, datos[campo.key])} />
-          ))}
-        </div>
+        <Card variant="outlined">
+          <CardHeader
+            title="Información del Paciente"
+            sx={{
+              bgcolor: "grey.50",
+              borderBottom: "1px solid",
+              borderColor: "divider",
+              py: 2,
+            }}
+          />
+          <CardContent sx={{ p: 0 }}>
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+              {campos.map((campo) => (
+                <InfoFieldCompact
+                  key={campo.key}
+                  label={campo.label}
+                  value={formatValue(campo.key, datos[campo.key])}
+                />
+              ))}
+            </Box>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </Box>
   )
 }

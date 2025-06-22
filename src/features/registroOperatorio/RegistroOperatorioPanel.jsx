@@ -11,7 +11,7 @@ import MuiDataTable from "@/components/layout/MuiDataTable"
 import { Modal } from "@/components/ui/modal"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { RegistroOperatorioForm } from "@/features/registroOperatorio/RegistroOperatorioForm"
-import { setHistoriaClinica, forceUpdate } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
+import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
 
 export const RegistroOperatorioPanel = ({ episodioId }) => {
   const { datos: paciente } = useSelector((state) => state.historiaClinica)
@@ -106,9 +106,9 @@ export const RegistroOperatorioPanel = ({ episodioId }) => {
     {
       name: "Fecha operación",
       selector: (row) => {
-        if (!row.fecha_operacion) return "N/A";
-        const [year, month, day] = row.fecha_operacion.split('T')[0].split('-');
-        return `${day}/${month}/${year}`;
+        if (!row.fecha_operacion) return "N/A"
+        const [year, month, day] = row.fecha_operacion.split("T")[0].split("-")
+        return `${day}/${month}/${year}`
       },
       sortable: true,
       center: true,

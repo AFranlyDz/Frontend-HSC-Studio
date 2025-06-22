@@ -171,9 +171,9 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, RegistrosPo
     {
       name: "Fecha",
       selector: (row) => {
-        if (!row.fecha) return "N/A";
-        const [year, month, day] = row.fecha.split('T')[0].split('-');
-        return `${day}/${month}/${year}`;
+        if (!row.fecha) return "N/A"
+        const [year, month, day] = row.fecha.split("T")[0].split("-")
+        return `${day}/${month}/${year}`
       },
       sortable: true,
       center: true,

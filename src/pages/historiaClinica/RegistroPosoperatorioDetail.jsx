@@ -3,15 +3,15 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { HistoriaClinicaLayout } from "@/components/layout/HistoriaClinicaLayout"
-import { InfoField } from "@/components/shared/InfoField"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button, Paper, Box } from "@mui/material"
+import { InfoFieldCompact } from "@/components/shared/InfoFieldCompact"
+import { Button, Paper, Box, Card, CardContent, CardHeader, Typography } from "@mui/material"
 import { ArrowLeft, Edit } from "lucide-react"
 import axios from "axios"
 import { useDispatch, useSelector } from "react-redux"
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
 import { RegistroPosoperatorioForm } from "@/features/registroOperatorio/RegistroPosoperatorioForm"
 import { MuiTabs } from "@/components/shared/MuiTabs"
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
 
 function RegistroPosoperatorioDetail() {
   const navigate = useNavigate()
@@ -140,17 +140,25 @@ function RegistroPosoperatorioDetail() {
   // Configuración de las pestañas
   const tabs = [
     {
-      label: "Información General",
+      label: "Registro Posoperatorio",
+      icon: <InfoOutlineIcon />,
+      iconPosition: "start",
       content: (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Información del Registro Posoperatorio</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Box sx={{ p: 3 }}>
+          <Card variant="outlined">
+            <CardHeader
+              title="Información del Registro Posoperatorio"
+              sx={{
+                bgcolor: "grey.50",
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                py: 2,
+              }}
+            />
+            <CardContent sx={{ p: 0 }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                 {campos.map((campo) => (
-                  <InfoField
+                  <InfoFieldCompact
                     key={campo.key}
                     label={campo.label}
                     value={
@@ -158,10 +166,10 @@ function RegistroPosoperatorioDetail() {
                     }
                   />
                 ))}
-              </div>
+              </Box>
             </CardContent>
           </Card>
-        </div>
+        </Box>
       ),
     },
   ]
@@ -186,17 +194,17 @@ function RegistroPosoperatorioDetail() {
 
       {editing ? (
         <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
-          <CardHeader>
-            <CardTitle>Editar Registro Posoperatorio</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 3 }}>
+              Editar Registro Posoperatorio
+            </Typography>
             <RegistroPosoperatorioForm
               initialData={registroPosoperatorio}
               onSubmit={handleSubmit}
               isLoading={loading}
               onCancel={handleCancel}
             />
-          </CardContent>
+          </Box>
         </Paper>
       ) : (
         <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>

@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { HistoriaClinicaLayout } from "@/components/layout/HistoriaClinicaLayout"
-import { InfoField } from "@/components/shared/InfoField"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button, Paper, Box } from "@mui/material"
+import { InfoFieldCompact } from "@/components/shared/InfoFieldCompact"
+import { Button, Paper, Box, Card, CardContent, CardHeader, Typography } from "@mui/material"
 import { ArrowLeft, Edit } from "lucide-react"
 import axios from "axios"
 import { useDispatch } from "react-redux"
@@ -15,6 +14,7 @@ import { MuiTabs } from "@/components/shared/MuiTabs"
 import { RasgosClinicosEpisodioPanel } from "@/features/gestionarEpisodio/RasgosClinicosEpisodioPanel"
 import { RegistroOperatorioPanel } from "@/features/registroOperatorio/RegistroOperatorioPanel"
 import { HematomasSubduralesPanel } from "@/features/hematoma/HematomasSubduralesPanel"
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
 
 function EpisodioDetail() {
   const navigate = useNavigate()
@@ -122,46 +122,54 @@ function EpisodioDetail() {
   // Configuración de las pestañas
   const tabs = [
     {
-      label: "Información General",
+      label: "Episodio",
+      icon: <InfoOutlineIcon />,
+      iconPosition: "start",
       content: (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Información del Episodio</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Box sx={{ p: 3 }}>
+          <Card variant="outlined" sx={{ mb: 3 }}>
+            <CardHeader
+              title="Información del Episodio"
+              sx={{
+                bgcolor: "grey.50",
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                py: 2,
+              }}
+            />
+            <CardContent sx={{ p: 0 }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                 {campos.map((campo) => (
-                  <InfoField
+                  <InfoFieldCompact
                     key={campo.key}
                     label={campo.label}
                     value={campo.format ? campo.format(episodio[campo.key]) : episodio[campo.key]}
                   />
                 ))}
-              </div>
+              </Box>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Descripción y Observaciones</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                    Descripción del antecedente
-                  </h3>
-                  <p className="mt-1 text-lg text-gray-800">{episodio.descripcion_antecedente || "N/A"}</p>
-                </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Observaciones</h3>
-                  <p className="mt-1 text-lg text-gray-800">{episodio.observaciones || "N/A"}</p>
-                </div>
-              </div>
+          <Card variant="outlined">
+            <CardHeader
+              title="Descripción y Observaciones"
+              sx={{
+                bgcolor: "grey.50",
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                py: 2,
+              }}
+            />
+            <CardContent sx={{ p: 0 }}>
+              <InfoFieldCompact
+                label="Descripción del antecedente"
+                value={episodio.descripcion_antecedente}
+                gridColumn={2}
+              />
+              <InfoFieldCompact label="Observaciones" value={episodio.observaciones} gridColumn={2} />
             </CardContent>
           </Card>
-        </div>
+        </Box>
       ),
     },
     {
@@ -202,12 +210,12 @@ function EpisodioDetail() {
 
       {editing ? (
         <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>
-          <CardHeader>
-            <CardTitle>Editar Episodio</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 3 }}>
+              Editar Episodio
+            </Typography>
             <EpisodioForm initialData={episodio} onSubmit={handleSubmit} isLoading={loading} onCancel={handleCancel} />
-          </CardContent>
+          </Box>
         </Paper>
       ) : (
         <Paper elevation={1} sx={{ borderRadius: 2, overflow: "hidden" }}>

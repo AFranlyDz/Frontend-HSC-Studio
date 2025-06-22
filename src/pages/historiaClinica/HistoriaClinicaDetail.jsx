@@ -9,6 +9,7 @@ import { InformacionBasicaPanel } from "@/features/general/InformacionBasicaPane
 import { RasgosClinicosPanel } from "@/features/general/RasgosClinicosPanel"
 import { EpisodiosPanel } from "@/features/general/EpisodiosPanel"
 import { Paper } from "@mui/material"
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
 
 function HistoriaClinicaDetail() {
   const { datos } = useSelector((state) => state.historiaClinica)
@@ -46,6 +47,8 @@ function HistoriaClinicaDetail() {
     {
       label: "Información Básica",
       content: <InformacionBasicaPanel />,
+      icon: <InfoOutlineIcon />,
+      iconPosition: "start",
     },
     {
       label: "Rasgos Clínicos Globales",
