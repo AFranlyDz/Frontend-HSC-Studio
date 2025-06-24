@@ -14,7 +14,7 @@ import { MuiTabs } from "@/components/shared/MuiTabs"
 import { RasgosClinicosOperatoriosPanel } from "@/features/registroOperatorio/RasgosClinicosOperatoriosPanel"
 import { RegistrosPosoperatoriosPanel } from "@/features/registroOperatorio/RegistrosPosoperatoriosPanel"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
-import { displayValueOrDash, formatDateOrDash, formatBooleanOrDash } from "@/libs/displayUtils"
+import { displayValueOrDash, formatDateOrDash, formatBooleanOrDash } from "@/utils/displayUtils"
 
 function RegistroOperatorioDetail() {
   const navigate = useNavigate()
@@ -212,6 +212,7 @@ function RegistroOperatorioDetail() {
               onSubmit={handleSubmit}
               isLoading={loading}
               onCancel={handleCancel}
+              episodioId={episodio.id}
             />
           </Box>
         </Paper>

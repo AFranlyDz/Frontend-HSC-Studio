@@ -9,13 +9,13 @@ import { ArrowLeft, Edit } from "lucide-react"
 import axios from "axios"
 import { useDispatch } from "react-redux"
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
-import { EpisodioForm } from "@/components/shared/EpisodioForm"
+import { EpisodioForm } from "@/features/gestionarEpisodio/EpisodioForm"
 import { MuiTabs } from "@/components/shared/MuiTabs"
 import { RasgosClinicosEpisodioPanel } from "@/features/gestionarEpisodio/RasgosClinicosEpisodioPanel"
 import { RegistroOperatorioPanel } from "@/features/registroOperatorio/RegistroOperatorioPanel"
 import { HematomasSubduralesPanel } from "@/features/hematoma/HematomasSubduralesPanel"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
-import { formatDateOrDash, formatBooleanOrDash, displayValueOrDash } from "@/libs/displayUtils"
+import { formatDateOrDash, formatBooleanOrDash, displayValueOrDash } from "@/utils/displayUtils"
 
 function EpisodioDetail() {
   const navigate = useNavigate()

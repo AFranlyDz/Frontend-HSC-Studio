@@ -12,7 +12,7 @@ import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historia
 import { HematomaSubduralForm } from "@/features/hematoma/HematomaSubduralForm"
 import { MuiTabs } from "@/components/shared/MuiTabs"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
-import { displayValueOrDash, formatBooleanOrDash } from "@/libs/displayUtils"
+import { displayValueOrDash, formatBooleanOrDash } from "@/utils/displayUtils"
 
 function HematomaSubduralDetail() {
   const navigate = useNavigate()
@@ -87,7 +87,21 @@ function HematomaSubduralDetail() {
     }
   }
 
-  // Campos a mostrar en la vista de detalle - ahora usando las funciones utilitarias
+  // Función para formatear localización
+  const formatLocalizacion = (value) => {
+    if (value === 0) return "Derecho"
+    if (value === 1) return "Izquierdo"
+    return displayValueOrDash(value)
+  }
+
+  // Función para formatear método de lectura
+  const formatMetodoLectura = (value) => {
+    if (value === true) return "Automático"
+    if (value === false) return "Manual"
+    return displayValueOrDash(value)
+  }
+
+  // Campos a mostrar en la vista de detalle
   const campos = [
     {
       label: "Escala Glasgow al ingreso",
@@ -184,7 +198,7 @@ function HematomaSubduralDetail() {
     {
       label: "Localización",
       key: "localización",
-      value: displayValueOrDash(hematoma.localización),
+      value: formatLocalizacion(hematoma.localización),
     },
     {
       label: "Topografía",
@@ -199,7 +213,7 @@ function HematomaSubduralDetail() {
     {
       label: "Método de lectura",
       key: "metodo_lectura",
-      value: formatBooleanOrDash(hematoma.metodo_lectura),
+      value: formatMetodoLectura(hematoma.metodo_lectura),
     },
   ]
 

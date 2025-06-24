@@ -1,7 +1,7 @@
 "use client"
 
 import { Box, Typography } from "@mui/material"
-import { displayValueOrDash } from "@/libs/displayUtils"
+import { displayValueOrDash } from "@/utils/displayUtils"
 
 export const InfoFieldCompact = ({ label, value, gridColumn = 1 }) => {
   // Usar la función utilitaria para mostrar el valor o la pleca

@@ -33,7 +33,6 @@ export const HematomasSubduralesPanel = ({ episodioId }) => {
     try {
       const dataToSend = {
         ...formData,
-        episodio: episodioId,
       }
 
       await axios.post(`${apiUrl}hematomas_subdurales/`, dataToSend)

@@ -12,7 +12,7 @@ import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historia
 import { RegistroPosoperatorioForm } from "@/features/registroOperatorio/RegistroPosoperatorioForm"
 import { MuiTabs } from "@/components/shared/MuiTabs"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
-import { displayValueOrDash, formatDateOrDash, formatBooleanOrDash } from "@/libs/displayUtils"
+import { displayValueOrDash, formatDateOrDash, formatBooleanOrDash } from "@/utils/displayUtils"
 
 function RegistroPosoperatorioDetail() {
   const navigate = useNavigate()
@@ -201,6 +201,7 @@ function RegistroPosoperatorioDetail() {
               onSubmit={handleSubmit}
               isLoading={loading}
               onCancel={handleCancel}
+              registroOperatorioId={registroOperatorio.id}
             />
           </Box>
         </Paper>
