@@ -47,29 +47,15 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, RegistrosPo
         registro_operatorio: registroOperatorioId,
       }
 
-      const response = await axios.post(`${apiUrl}registro_posoperatorio/`, dataToSend)
+      await axios.post(`${apiUrl}registro_posoperatorio/`, dataToSend)
 
       // Actualizar el estado local
-      const pacienteActualizado = {
-        ...paciente,
-        episodios: paciente.episodios.map((ep) => ({
-          ...ep,
-          registro_operatorio:
-            ep.registro_operatorio?.map((ro) =>
-              ro.id === registroOperatorioId
-                ? {
-                    ...ro,
-                    registros_posoperatorios: [...(ro.registros_posoperatorios || []), response.data],
-                  }
-                : ro,
-            ) || [],
-        })),
-      }
-      dispatch(setHistoriaClinica(pacienteActualizado))
+      const pacienteActualizado = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      dispatch(setHistoriaClinica(pacienteActualizado.data))
       setShowAddModal(false)
       alert("Registro posoperatorio creado correctamente")
-      setPaciente(pacienteActualizado)
-      const registrosPosop = getRegistrosPosoperatorios(pacienteActualizado, registroOperatorioId)
+      setPaciente(pacienteActualizado.data)
+      const registrosPosop = getRegistrosPosoperatorios(pacienteActualizado.data, registroOperatorioId)
       setRegistrosPosoperatorios(registrosPosop)
     } catch (error) {
       console.error("Error al crear el registro posoperatorio:", error)
@@ -94,30 +80,14 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, RegistrosPo
         registro_operatorio: registroOperatorioId,
       }
 
-      const response = await axios.put(`${apiUrl}registro_posoperatorio/${formData.id}/`, dataToSend)
+      // CORRECCIÓN: Usar selectedRegistro.id en lugar de formData.id
+      await axios.put(`${apiUrl}registro_posoperatorio/${selectedRegistro.id}/`, dataToSend)
 
-      // Actualizar el estado local
-      const pacienteActualizado = {
-        ...paciente,
-        episodios: paciente.episodios.map((ep) => ({
-          ...ep,
-          registro_operatorio:
-            ep.registro_operatorio?.map((ro) =>
-              ro.id === registroOperatorioId
-                ? {
-                    ...ro,
-                    registros_posoperatorios:
-                      ro.registros_posoperatorios?.map((rp) => (rp.id === formData.id ? response.data : rp)) || [],
-                  }
-                : ro,
-            ) || [],
-        })),
-      }
-
-      dispatch(setHistoriaClinica(pacienteActualizado))
+      const pacienteActualizado = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+      dispatch(setHistoriaClinica(pacienteActualizado.data))
       setShowEditModal(false)
-      setPaciente(pacienteActualizado)
-      const registrosPosop = getRegistrosPosoperatorios(pacienteActualizado, registroOperatorioId)
+      setPaciente(pacienteActualizado.data)
+      const registrosPosop = getRegistrosPosoperatorios(pacienteActualizado.data, registroOperatorioId)
       setRegistrosPosoperatorios(registrosPosop)
       alert("Registro posoperatorio actualizado correctamente")
     } catch (error) {
@@ -135,28 +105,12 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, RegistrosPo
       try {
         await axios.delete(`${apiUrl}registro_posoperatorio/${id}/`)
 
-        // Actualizar el estado local
-        const pacienteActualizado = {
-          ...paciente,
-          episodios: paciente.episodios.map((ep) => ({
-            ...ep,
-            registro_operatorio:
-              ep.registro_operatorio?.map((ro) =>
-                ro.id === registroOperatorioId
-                  ? {
-                      ...ro,
-                      registros_posoperatorios: ro.registros_posoperatorios?.filter((rp) => rp.id !== id) || [],
-                    }
-                  : ro,
-              ) || [],
-          })),
-        }
-
-        dispatch(setHistoriaClinica(pacienteActualizado))
-        const registrosPosop = getRegistrosPosoperatorios(pacienteActualizado, registroOperatorioId)
+        const pacienteActualizado = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
+        dispatch(setHistoriaClinica(pacienteActualizado.data))
+        const registrosPosop = getRegistrosPosoperatorios(pacienteActualizado.data, registroOperatorioId)
         setRegistrosPosoperatorios(registrosPosop)
         alert("Registro posoperatorio eliminado correctamente")
-        setPaciente(pacienteActualizado)
+        setPaciente(pacienteActualizado.data)
       } catch (error) {
         console.error("Error al eliminar el registro posoperatorio:", error)
         alert("Error al eliminar el registro posoperatorio")
@@ -305,7 +259,12 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, RegistrosPo
           title="Agregar Registro Posoperatorio"
           size="lg"
         >
-          <RegistroPosoperatorioForm onSubmit={handleCreate} isLoading={loading} />
+          <RegistroPosoperatorioForm
+            onSubmit={handleCreate}
+            isLoading={loading}
+            registroOperatorioId={registroOperatorioId}
+            onCancel={() => setShowAddModal(false)}
+          />
         </Modal>
       </div>
     )
@@ -343,7 +302,12 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, RegistrosPo
         title="Agregar Registro Posoperatorio"
         size="lg"
       >
-        <RegistroPosoperatorioForm onSubmit={handleCreate} isLoading={loading} />
+        <RegistroPosoperatorioForm
+          onSubmit={handleCreate}
+          isLoading={loading}
+          registroOperatorioId={registroOperatorioId}
+          onCancel={() => setShowAddModal(false)}
+        />
       </Modal>
 
       {/* Modal para editar registro */}
@@ -353,7 +317,13 @@ export const RegistrosPosoperatoriosPanel = ({ registroOperatorioId, RegistrosPo
         title="Editar Registro Posoperatorio"
         size="lg"
       >
-        <RegistroPosoperatorioForm initialData={selectedRegistro} onSubmit={handleUpdate} isLoading={loading} />
+        <RegistroPosoperatorioForm
+          initialData={selectedRegistro}
+          onSubmit={handleUpdate}
+          isLoading={loading}
+          registroOperatorioId={registroOperatorioId}
+          onCancel={() => setShowEditModal(false)}
+        />
       </Modal>
     </div>
   )

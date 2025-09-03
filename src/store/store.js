@@ -4,16 +4,18 @@ import storage from "redux-persist/lib/storage";
 
 import historiaClinicaReducer from "@/features/gestionarHistoriaClinica/historiaClinicaSlice";
 import codificadorReducer from "@/features/codificadores/codificadoresSlice"
+import authReducer from "@/features/auth/authSlice"
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["historiaClinica", "codificador"], // Solo persiste este slice
+  whitelist: ["historiaClinica", "codificador", 'auth'], // Solo persiste este slice
 };
 
 const rootReducer = combineReducers({
   historiaClinica: historiaClinicaReducer,
   codificador: codificadorReducer,
+  auth: authReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

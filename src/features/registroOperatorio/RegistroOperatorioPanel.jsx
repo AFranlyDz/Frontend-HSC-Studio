@@ -241,7 +241,12 @@ export const RegistroOperatorioPanel = ({ episodioId }) => {
           title="Agregar Registro Operatorio"
           size="lg"
         >
-          <RegistroOperatorioForm onSubmit={handleCreate} isLoading={loading} />
+          <RegistroOperatorioForm
+            onSubmit={handleCreate}
+            isLoading={loading}
+            episodioId={episodioId}
+            onCancel={() => setShowAddModal(false)}
+          />
         </Modal>
       </div>
     )
@@ -274,7 +279,12 @@ export const RegistroOperatorioPanel = ({ episodioId }) => {
 
       {/* Modal para agregar registro */}
       <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Agregar Registro Operatorio" size="lg">
-        <RegistroOperatorioForm onSubmit={handleCreate} isLoading={loading} />
+        <RegistroOperatorioForm
+          onSubmit={handleCreate}
+          isLoading={loading}
+          episodioId={episodioId}
+          onCancel={() => setShowAddModal(false)}
+        />
       </Modal>
 
       {/* Modal para editar registro */}
@@ -284,7 +294,13 @@ export const RegistroOperatorioPanel = ({ episodioId }) => {
         title="Editar Registro Operatorio"
         size="lg"
       >
-        <RegistroOperatorioForm initialData={selectedRegistro} onSubmit={handleUpdate} isLoading={loading} />
+        <RegistroOperatorioForm
+          initialData={selectedRegistro}
+          onSubmit={handleUpdate}
+          isLoading={loading}
+          episodioId={episodioId}
+          onCancel={() => setShowEditModal(false)}
+        />
       </Modal>
     </div>
   )

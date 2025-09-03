@@ -12,6 +12,8 @@ import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historia
 import { HematomaSubduralForm } from "@/features/hematoma/HematomaSubduralForm"
 import { MuiTabs } from "@/components/shared/MuiTabs"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
+import { displayValueOrDash, formatBooleanOrDash } from "@/utils/displayUtils"
+import { useCustomAlert } from "@/hooks/useCustomAlert"
 
 function HematomaSubduralDetail() {
   const navigate = useNavigate()
@@ -24,6 +26,7 @@ function HematomaSubduralDetail() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const apiUrl = import.meta.env.VITE_API_BACKEND
+  const { warning, success, error, info } = useCustomAlert()
 
   // Recuperar datos del hematoma y episodio desde sessionStorage
   useEffect(() => {
@@ -77,7 +80,7 @@ function HematomaSubduralDetail() {
       dispatch(setHistoriaClinica(response.data))
 
       setEditing(false)
-      alert("Hematoma subdural actualizado correctamente")
+      success("Hematoma Subdural actualizado correctamente")
     } catch (error) {
       console.error("Error al actualizar:", error)
       alert("Error al actualizar el hematoma subdural")
@@ -86,98 +89,133 @@ function HematomaSubduralDetail() {
     }
   }
 
+  // Función para formatear localización
+  const formatLocalizacion = (value) => {
+    if (value === 0) return "Derecho"
+    if (value === 1) return "Izquierdo"
+    return displayValueOrDash(value)
+  }
+
+  // Función para formatear método de lectura
+  const formatMetodoLectura = (value) => {
+    if (value === true) return "Automático"
+    if (value === false) return "Manual"
+    return displayValueOrDash(value)
+  }
+
   // Campos a mostrar en la vista de detalle
   const campos = [
     {
       label: "Escala Glasgow al ingreso",
       key: "escala_glasgow_ingreso",
+      value: displayValueOrDash(hematoma.escala_glasgow_ingreso),
     },
     {
       label: "Escala McWalder",
       key: "escala_mcwalder",
+      value: displayValueOrDash(hematoma.escala_mcwalder),
     },
     {
       label: "Escala Gordon-Firing",
       key: "escala_gordon_firing",
+      value: displayValueOrDash(hematoma.escala_gordon_firing),
     },
     {
       label: "Escala Pronóstica Oslo Preoperatoria",
       key: "escala_pronostica_oslo_preoperatoria",
+      value: displayValueOrDash(hematoma.escala_pronostica_oslo_preoperatoria),
     },
     {
       label: "Escala Nomura",
       key: "escala_nomura",
+      value: displayValueOrDash(hematoma.escala_nomura),
     },
     {
       label: "Escala Nakagushi",
       key: "escala_nakagushi",
+      value: displayValueOrDash(hematoma.escala_nakagushi),
     },
     {
       label: "Longitud (mm)",
       key: "valor_longitud",
+      value: displayValueOrDash(hematoma.valor_longitud),
     },
     {
       label: "Diámetro (mm)",
       key: "valor_diametro",
+      value: displayValueOrDash(hematoma.valor_diametro),
     },
     {
       label: "Altura (mm)",
       key: "valor_altura",
+      value: displayValueOrDash(hematoma.valor_altura),
     },
     {
       label: "Volumen Tada (ml)",
       key: "volumen_tada",
+      value: displayValueOrDash(hematoma.volumen_tada),
     },
     {
       label: "Volumen (ml)",
       key: "volumen",
+      value: displayValueOrDash(hematoma.volumen),
     },
     {
       label: "Grupo Volumen",
       key: "grupo_volumen",
+      value: displayValueOrDash(hematoma.grupo_volumen),
     },
     {
       label: "Grupo Volumen Residual Postoperatorio",
       key: "grupo_volumen_residual_posoperatorio",
+      value: displayValueOrDash(hematoma.grupo_volumen_residual_posoperatorio),
     },
     {
       label: "Diámetro de la capa (mm)",
       key: "diametro_capa",
+      value: displayValueOrDash(hematoma.diametro_capa),
     },
     {
       label: "Diámetro mayor transverso (mm)",
       key: "diametro_mayor_transverso",
+      value: displayValueOrDash(hematoma.diametro_mayor_transverso),
     },
     {
       label: "Grupo Diámetro",
       key: "grupo_diametro",
+      value: displayValueOrDash(hematoma.grupo_diametro),
     },
     {
       label: "Presencia de membrana",
       key: "presencia_membrana",
-      format: (value) => (value ? "Sí" : "No"),
+      value: formatBooleanOrDash(hematoma.presencia_membrana),
+      show: true,
     },
     {
       label: "Tipo de membrana",
       key: "tipo_membrana",
-      show: (hematoma) => hematoma.presencia_membrana,
+      value: displayValueOrDash(hematoma.tipo_membrana),
+      show: hematoma.presencia_membrana,
     },
     {
       label: "Localización",
       key: "localización",
+      value: formatLocalizacion(hematoma.localización),
     },
     {
       label: "Topografía",
       key: "topografia",
+      value: displayValueOrDash(hematoma.topografia),
     },
     {
       label: "Desviación línea media (mm)",
       key: "desviacion_linea_media",
+      value: displayValueOrDash(hematoma.desviacion_linea_media),
     },
     {
       label: "Método de lectura",
       key: "metodo_lectura",
-      format: (value) => (value ? "Sí" : "No"),
+      value: formatMetodoLectura(hematoma.metodo_lectura),
     },
   ]
 
@@ -202,13 +240,9 @@ function HematomaSubduralDetail() {
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                 {campos
-                  .filter((campo) => (campo.show ? campo.show(hematoma) : true))
+                  .filter((campo) => (campo.show !== undefined ? campo.show : true))
                   .map((campo) => (
-                    <InfoFieldCompact
-                      key={campo.key}
-                      label={campo.label}
-                      value={campo.format ? campo.format(hematoma[campo.key]) : hematoma[campo.key]}
-                    />
+                    <InfoFieldCompact key={campo.key} label={campo.label} value={campo.value} />
                   ))}
               </Box>
             </CardContent>
@@ -227,7 +261,7 @@ function HematomaSubduralDetail() {
             <CardContent sx={{ p: 0 }}>
               <InfoFieldCompact
                 label="Observaciones"
-                value={hematoma.observaciones || "No hay observaciones registradas"}
+                value={displayValueOrDash(hematoma.observaciones)}
                 gridColumn={2}
               />
             </CardContent>

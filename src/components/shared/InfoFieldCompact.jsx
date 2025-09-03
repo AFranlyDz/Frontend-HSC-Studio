@@ -1,8 +1,12 @@
 "use client"
 
 import { Box, Typography } from "@mui/material"
+import { displayValueOrDash } from "@/utils/displayUtils"
 
 export const InfoFieldCompact = ({ label, value, gridColumn = 1 }) => {
+  // Usar la función utilitaria para mostrar el valor o la pleca
+  const displayValue = displayValueOrDash(value)
+
   return (
     <Box
       sx={{
@@ -42,7 +46,7 @@ export const InfoFieldCompact = ({ label, value, gridColumn = 1 }) => {
           ml: 2,
         }}
       >
-        {value || "N/A"}
+        {displayValue}
       </Typography>
     </Box>
   )

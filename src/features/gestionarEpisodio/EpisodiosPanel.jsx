@@ -10,7 +10,7 @@ import { Button, Chip, Box } from "@mui/material"
 import MuiDataTable from "@/components/layout/MuiDataTable"
 import { Modal } from "@/components/ui/modal"
 import { EmptyState } from "@/components/shared/EmptyState"
-import { EpisodioForm } from "@/components/shared/EpisodioForm"
+import { EpisodioForm } from "@/features/gestionarEpisodio/EpisodioForm"
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
 
 export const EpisodiosPanel = () => {
@@ -31,9 +31,9 @@ export const EpisodiosPanel = () => {
         ...formData,
         historia_clinica: paciente.id,
       }
-      
+
       await axios.post(`${apiUrl}episodios/`, dataToSend)
-      
+
       const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
       dispatch(setHistoriaClinica(response.data))
 
@@ -62,7 +62,8 @@ export const EpisodiosPanel = () => {
         historia_clinica: paciente.id,
       }
 
-      await axios.put(`${apiUrl}episodios/${formData.id}/`, dataToSend)
+      // CORRECCIÓN: Usar selectedEpisodio.id en lugar de formData.id
+      await axios.put(`${apiUrl}episodios/${selectedEpisodio.id}/`, dataToSend)
 
       const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
       dispatch(setHistoriaClinica(response.data))
@@ -92,7 +93,7 @@ export const EpisodiosPanel = () => {
         await axios.delete(`${apiUrl}episodios/${id}/`)
         const response = await axios.get(`${apiUrl}gestionar_historia_clinica/${paciente.id}/`)
         dispatch(setHistoriaClinica(response.data))
-        
+
         alert("Episodio eliminado correctamente")
       } catch (error) {
         console.error("Error al eliminar el episodio:", error)
@@ -108,18 +109,20 @@ export const EpisodiosPanel = () => {
     {
       name: "Fecha de inicio",
       selector: (row) => {
-        if (!row.inicio) return "N/A";
-        const [year, month, day] = row.inicio.split('T')[0].split('-');
-        return `${day}/${month}/${year}`;
+        if (!row.inicio) return "N/A"
+        const [year, month, day] = row.inicio.split("T")[0].split("-")
+        return `${day}/${month}/${year}`
       },
       sortable: true,
       center: true,
     },
     {
       name: "Fecha de alta",
-      selector: (row) => {if (!row.fecha_alta) return "N/A";
-        const [year, month, day] = row.fecha_alta.split('T')[0].split('-');
-        return `${day}/${month}/${year}`;},
+      selector: (row) => {
+        if (!row.fecha_alta) return "N/A"
+        const [year, month, day] = row.fecha_alta.split("T")[0].split("-")
+        return `${day}/${month}/${year}`
+      },
       sortable: true,
       center: true,
     },
@@ -231,7 +234,7 @@ export const EpisodiosPanel = () => {
 
         {/* Modal para agregar episodio */}
         <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Agregar Episodio" size="lg">
-          <EpisodioForm onSubmit={handleCreate} isLoading={loading} />
+          <EpisodioForm onSubmit={handleCreate} isLoading={loading} onCancel={() => setShowAddModal(false)} />
         </Modal>
       </div>
     )
@@ -264,12 +267,17 @@ export const EpisodiosPanel = () => {
 
       {/* Modal para agregar episodio */}
       <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Agregar Episodio" size="lg">
-        <EpisodioForm onSubmit={handleCreate} isLoading={loading} />
+        <EpisodioForm onSubmit={handleCreate} isLoading={loading} onCancel={() => setShowAddModal(false)} />
       </Modal>
 
       {/* Modal para editar episodio */}
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Episodio" size="lg">
-        <EpisodioForm initialData={selectedEpisodio} onSubmit={handleUpdate} isLoading={loading} />
+        <EpisodioForm
+          initialData={selectedEpisodio}
+          onSubmit={handleUpdate}
+          isLoading={loading}
+          onCancel={() => setShowEditModal(false)}
+        />
       </Modal>
     </div>
   )

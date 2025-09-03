@@ -9,12 +9,13 @@ import { ArrowLeft, Edit } from "lucide-react"
 import axios from "axios"
 import { useDispatch } from "react-redux"
 import { setHistoriaClinica } from "@/features/gestionarHistoriaClinica/historiaClinicaSlice"
-import { EpisodioForm } from "@/components/shared/EpisodioForm"
+import { EpisodioForm } from "@/features/gestionarEpisodio/EpisodioForm"
 import { MuiTabs } from "@/components/shared/MuiTabs"
 import { RasgosClinicosEpisodioPanel } from "@/features/gestionarEpisodio/RasgosClinicosEpisodioPanel"
 import { RegistroOperatorioPanel } from "@/features/registroOperatorio/RegistroOperatorioPanel"
 import { HematomasSubduralesPanel } from "@/features/hematoma/HematomasSubduralesPanel"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
+import { formatDateOrDash, formatBooleanOrDash, displayValueOrDash } from "@/utils/displayUtils"
 
 function EpisodioDetail() {
   const navigate = useNavigate()
@@ -97,26 +98,38 @@ function EpisodioDetail() {
     }
   }
 
-  // Campos a mostrar
+  // Campos a mostrar - ahora usando las funciones utilitarias
   const campos = [
     {
       label: "Fecha de inicio",
       key: "inicio",
-      format: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
+      value: formatDateOrDash(episodio.inicio),
     },
     {
       label: "Fecha de alta",
       key: "fecha_alta",
-      format: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
+      value: formatDateOrDash(episodio.fecha_alta),
     },
-    { label: "Tiempo de estadía (días)", key: "tiempo_estadia" },
+    {
+      label: "Tiempo de estadía (días)",
+      key: "tiempo_estadia",
+      value: displayValueOrDash(episodio.tiempo_estadia),
+    },
     {
       label: "Estado al egreso",
       key: "estado_al_egreso",
-      format: (value) => (value ? "Favorable" : "Desfavorable"),
+      value: formatBooleanOrDash(episodio.estado_al_egreso, "Favorable", "Desfavorable"),
     },
-    { label: "Tiempo de antecedente (días)", key: "tiempo_antecedente" },
-    { label: "Edad del paciente", key: "edad_paciente" },
+    {
+      label: "Tiempo de antecedente (días)",
+      key: "tiempo_antecedente",
+      value: displayValueOrDash(episodio.tiempo_antecedente),
+    },
+    {
+      label: "Edad del paciente",
+      key: "edad_paciente",
+      value: displayValueOrDash(episodio.edad_paciente),
+    },
   ]
 
   // Configuración de las pestañas
@@ -140,11 +153,7 @@ function EpisodioDetail() {
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
                 {campos.map((campo) => (
-                  <InfoFieldCompact
-                    key={campo.key}
-                    label={campo.label}
-                    value={campo.format ? campo.format(episodio[campo.key]) : episodio[campo.key]}
-                  />
+                  <InfoFieldCompact key={campo.key} label={campo.label} value={campo.value} />
                 ))}
               </Box>
             </CardContent>
@@ -163,10 +172,14 @@ function EpisodioDetail() {
             <CardContent sx={{ p: 0 }}>
               <InfoFieldCompact
                 label="Descripción del antecedente"
-                value={episodio.descripcion_antecedente}
+                value={displayValueOrDash(episodio.descripcion_antecedente)}
                 gridColumn={2}
               />
-              <InfoFieldCompact label="Observaciones" value={episodio.observaciones} gridColumn={2} />
+              <InfoFieldCompact
+                label="Observaciones"
+                value={displayValueOrDash(episodio.observaciones)}
+                gridColumn={2}
+              />
             </CardContent>
           </Card>
         </Box>

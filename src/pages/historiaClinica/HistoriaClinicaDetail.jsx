@@ -7,7 +7,7 @@ import { HistoriaClinicaLayout } from "@/components/layout/HistoriaClinicaLayout
 import { MuiTabs } from "@/components/shared/MuiTabs"
 import { InformacionBasicaPanel } from "@/features/general/InformacionBasicaPanel"
 import { RasgosClinicosPanel } from "@/features/general/RasgosClinicosPanel"
-import { EpisodiosPanel } from "@/features/general/EpisodiosPanel"
+import { EpisodiosPanel } from "@/features/gestionarEpisodio/EpisodiosPanel"
 import { Paper } from "@mui/material"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
 
