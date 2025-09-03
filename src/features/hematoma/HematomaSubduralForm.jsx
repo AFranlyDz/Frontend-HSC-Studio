@@ -11,9 +11,10 @@ import {
   TOPOGRAFIA_OPTIONS,
 } from "@/utils/hematomaValidationUtils"
 
-export function HematomaSubduralForm({ initialData, onSubmit, isLoading, onCancel }) {
+export function HematomaSubduralForm({ initialData, onSubmit, isLoading, onCancel, episodioId }) {
   const [formData, setFormData] = useState({
     id: null,
+    episodio: episodioId,
     escala_glasgow_ingreso: 15,
     escala_mcwalder: 1,
     escala_gordon_firing: 1,
@@ -47,6 +48,7 @@ export function HematomaSubduralForm({ initialData, onSubmit, isLoading, onCance
     if (initialData) {
       setFormData({
         id: initialData.id,
+        episodio: episodioId,
         escala_glasgow_ingreso: initialData.escala_glasgow_ingreso || 15,
         escala_mcwalder: initialData.escala_mcwalder || 1,
         escala_gordon_firing: initialData.escala_gordon_firing || 1,

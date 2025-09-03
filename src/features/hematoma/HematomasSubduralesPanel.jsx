@@ -217,7 +217,7 @@ export const HematomasSubduralesPanel = ({ episodioId }) => {
 
         {/* Modal para agregar hematoma */}
         <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Agregar Hematoma Subdural" size="lg">
-          <HematomaSubduralForm onSubmit={handleCreate} isLoading={loading} />
+          <HematomaSubduralForm episodioId={episodioId} initialData='' onSubmit={handleCreate} isLoading={loading} />
         </Modal>
       </div>
     )
@@ -252,12 +252,12 @@ export const HematomasSubduralesPanel = ({ episodioId }) => {
 
       {/* Modal para agregar hematoma */}
       <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Agregar Hematoma Subdural" size="lg">
-        <HematomaSubduralForm onSubmit={handleCreate} isLoading={loading} />
+        <HematomaSubduralForm episodioId={episodioId} onSubmit={handleCreate} isLoading={loading} />
       </Modal>
 
       {/* Modal para editar hematoma */}
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Editar Hematoma Subdural" size="lg">
-        <HematomaSubduralForm initialData={selectedHematoma} onSubmit={handleUpdate} isLoading={loading} />
+        <HematomaSubduralForm episodioId={episodioId} initialData={selectedHematoma} onSubmit={handleUpdate} isLoading={loading} />
       </Modal>
     </div>
   )

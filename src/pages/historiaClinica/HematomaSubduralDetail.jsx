@@ -13,6 +13,7 @@ import { HematomaSubduralForm } from "@/features/hematoma/HematomaSubduralForm"
 import { MuiTabs } from "@/components/shared/MuiTabs"
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline"
 import { displayValueOrDash, formatBooleanOrDash } from "@/utils/displayUtils"
+import { useCustomAlert } from "@/hooks/useCustomAlert"
 
 function HematomaSubduralDetail() {
   const navigate = useNavigate()
@@ -25,6 +26,7 @@ function HematomaSubduralDetail() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const apiUrl = import.meta.env.VITE_API_BACKEND
+  const { warning, success, error, info } = useCustomAlert()
 
   // Recuperar datos del hematoma y episodio desde sessionStorage
   useEffect(() => {
@@ -78,7 +80,7 @@ function HematomaSubduralDetail() {
       dispatch(setHistoriaClinica(response.data))
 
       setEditing(false)
-      alert("Hematoma subdural actualizado correctamente")
+      success("Hematoma Subdural actualizado correctamente")
     } catch (error) {
       console.error("Error al actualizar:", error)
       alert("Error al actualizar el hematoma subdural")
